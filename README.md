@@ -19,14 +19,17 @@ The Roadside Assistance Backend provides the API and services that power the And
 
 ## Technology Stack
 
--   Backend Framework: 
+-   Backend Framework: ExpressJS
 -   Programming Language: JavaScript
 -   Database: PostgreSQL
+-   Athentification: PassportJS
+-   API Platform: Postman
 -   API Documentation Tool: 
+-   ORM: Prisma ORM
 
 ## Architecture
 
-The backend follows the [] architectural pattern.
+The backend follows the MVC architectural pattern.
 
 ## Setup Instructions
 
@@ -34,7 +37,7 @@ The backend follows the [] architectural pattern.
 
 ## API Documentation
 
-The API documentation is available at [].
+The API documentation is available at .
 
 ## Contribution Guidelines
 
