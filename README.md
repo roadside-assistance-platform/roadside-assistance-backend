@@ -20,11 +20,10 @@ The Roadside Assistance Backend provides the API and services that power the And
 ## Technology Stack
 
 -   Backend Framework: ExpressJS
--   Programming Language: JavaScript
+-   Programming Language: TypeScript
 -   Database: PostgreSQL
--   Athentification: PassportJS
--   API Platform: Postman
--   API Documentation Tool: 
+-   Athentification: PassportJs
+-   API Documentation Tool: Postman
 -   ORM: Prisma ORM
 
 ## Architecture
@@ -49,4 +48,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
 
 ## Contact
 
-Email me on: y.bouhouche@esi-sba.dz
+Email me on: ma.lachi@esi-sba.dz
