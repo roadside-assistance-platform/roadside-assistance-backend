@@ -28,23 +28,27 @@ app.use(passport.session());
 
 // Routes
 app.post("/create", async (req: any, res: any) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).send("Email and password are required");
+  if (!email || !password || !role) {
+    return res.status(400).send("Email, password, and role are required");
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser =
+      role === "client"
+        ? await prisma.client.findUnique({ where: { email } })
+        : await prisma.provider.findUnique({ where: { email } });
 
     if (existingUser) {
       return res.status(400).send("User already exists");
     }
 
     const hashedPassword = await hashPassword(password);
-    const newUser = await prisma.user.create({
-      data: { email, password: hashedPassword },
-    });
+    const newUser =
+      role === "client"
+        ? await prisma.client.create({ data: { email, password: hashedPassword } })
+        : await prisma.provider.create({ data: { email, password: hashedPassword } });
 
     res.status(201).json(newUser);
   } catch (error) {
@@ -54,12 +58,19 @@ app.post("/create", async (req: any, res: any) => {
 });
 
 app.post(
-  "/login",
-  passport.authenticate("local", {
+  "/login/client",
+  passport.authenticate("client-local", {
     successRedirect: "/home",
     failureRedirect: "/login",
-  }
-)
+  })
+);
+
+app.post(
+  "/login/provider",
+  passport.authenticate("provider-local", {
+    successRedirect: "/home",
+    failureRedirect: "/login",
+  })
 );
 
 app.get("/home", (req: Request, res: Response) => {
@@ -80,13 +91,13 @@ app.get("/logout", (req: Request, res: Response) => {
 });
 
 // Start the server
-prisma.$connect().then(() => {
-  // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-}).catch((e) => {
-  console.error("Error connecting to database: ", e);
-  process.exit(1);
-});
+prisma.$connect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((e) => {
+    console.error("Error connecting to database: ", e);
+    process.exit(1);
+  });

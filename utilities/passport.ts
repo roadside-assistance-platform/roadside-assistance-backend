@@ -5,37 +5,58 @@ import { comparePassword } from "./bcrypt";
 
 const prisma = new PrismaClient();
 
+// Client Authentication Strategy
 passport.use(
-  new LocalStrategy(
-    { usernameField: "email" },
-    async (email, password, done) => {
-      try {
-        const user = await prisma.user.findUnique({ where: { email } });
-
-        if (!user) {
-          return done(null, false, { message: "User not found" });
-        }
-
-        const isPasswordValid = await comparePassword(password, user.password);
-        if (!isPasswordValid) {
-          return done(null, false, { message: "Invalid password" });
-        }
-
-        return done(null, user);
-      } catch (error) {
-        return done(error);
+  "client-local",
+  new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
+    try {
+      const client = await prisma.client.findUnique({ where: { email } });
+      if (!client) {
+        return done(null, false, { message: "Client not found" });
       }
+      const isPasswordValid = await comparePassword(password, client.password);
+      if (!isPasswordValid) {
+        return done(null, false, { message: "Invalid password" });
+      }
+      return done(null, { ...client, role: "client" });
+    } catch (error) {
+      return done(error);
     }
-  )
+  })
 );
 
+// Provider Authentication Strategy
+passport.use(
+  "provider-local",
+  new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
+    try {
+      const provider = await prisma.provider.findUnique({ where: { email } });
+      if (!provider) {
+        return done(null, false, { message: "Provider not found" });
+      }
+      const isPasswordValid = await comparePassword(password, provider.password);
+      if (!isPasswordValid) {
+        return done(null, false, { message: "Invalid password" });
+      }
+      return done(null, { ...provider, role: "provider" });
+    } catch (error) {
+      return done(error);
+    }
+  })
+);
+
+// Serialize User
 passport.serializeUser((user: any, done) => {
-  done(null, user.id);
+  done(null, { id: user.id, role: user.role });
 });
 
-passport.deserializeUser(async (id: string, done) => {
+// Deserialize User
+passport.deserializeUser(async (data: { id: string; role: string }, done) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user =
+      data.role === "client"
+        ? await prisma.client.findUnique({ where: { id: data.id } })
+        : await prisma.provider.findUnique({ where: { id: data.id } });
     done(null, user);
   } catch (error) {
     done(error, null);
