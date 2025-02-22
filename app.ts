@@ -3,8 +3,8 @@ import { Request, Response } from "express";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import session from "express-session";
-import passport from "./passport";
-import { hashPassword } from "./bcrypt";
+import passport from "./utilities/passport";
+import { hashPassword } from "./utilities/bcrypt";
 
 dotenv.config();
 
@@ -80,6 +80,13 @@ app.get("/logout", (req: Request, res: Response) => {
 });
 
 // Start the server
+prisma.$connect().then(() => {
+  // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+}).catch((e) => {
+  console.error("Error connecting to database: ", e);
+  process.exit(1);
 });
