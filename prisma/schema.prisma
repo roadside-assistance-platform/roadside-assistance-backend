@@ -16,12 +16,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model user {
-  id        String   @id @default(uuid())
-  email     String   @unique
+model Provider {
+  id        String  @id @default(uuid())
+  fullName  String
+  email     String  @unique
   password  String
-  updatedAt DateTime @updatedAt
+  phone     String  @unique
+  photo     String
+  fieldId   String
+  location  String
+  rating    Int     @default(0)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  field     Field   @relation(fields: [fieldId], references: [id])
+  services  Service[]
+  comments  Comment[]
 }
 
+model Client {
+  id        String  @id @default(uuid())
+  fullName  String
+  email     String  @unique
+  password  String
+  phone     String  @unique
+  photo     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services  Service[]
+  comments  Comment[]
+}
+
+model Service {
+  id              String  @id @default(uuid())
+  clientId        String
+  providerId      String
+  price           Int
+  serviceRating   Int?
+  serviceLocation String
+  done            Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  client   Client   @relation(fields: [clientId], references: [id])
+  provider Provider @relation(fields: [providerId], references: [id])
+  comments Comment[]
+}
+
+model Comment {
+  id         String  @id @default(uuid())
+  clientId   String
+  providerId String
+  serviceId  String
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  client   Client   @relation(fields: [clientId], references: [id])
+  provider Provider @relation(fields: [providerId], references: [id])
+  service  Service  @relation(fields: [serviceId], references: [id])
+}
+
+
+model Admin {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Field {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  providers Provider[]
+}
