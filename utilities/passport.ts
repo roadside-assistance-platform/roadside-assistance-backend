@@ -1,9 +1,13 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { PrismaClient } from "@prisma/client";
 import { comparePassword } from "./bcrypt";
 
 const prisma = new PrismaClient();
+
+const GOOGLE_CLIENT_ID = "your-google-client-id";
+const GOOGLE_CLIENT_SECRET = "your-google-client-secret";
 
 // Client Authentication Strategy
 passport.use(
@@ -45,6 +49,47 @@ passport.use(
   })
 );
 
+// Google Authentication Strategy
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return done(null, false, { message: "No email found" });
+        }
+
+        let user = await prisma.client.findUnique({ where: { email } });
+        let role = "client";
+
+        if (!user) {
+          user = await prisma.provider.findUnique({ where: { email } });
+          role = "provider";
+        }
+
+        if (!user) {
+          // If user does not exist, create a new client by default
+          user = await prisma.client.create({
+            data: {
+              email,
+              name: profile.displayName,
+            },
+          });
+        }
+
+        return done(null, { ...user, role });
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
+
 // Serialize User
 passport.serializeUser((user: any, done) => {
   done(null, { id: user.id, role: user.role });
@@ -57,6 +102,7 @@ passport.deserializeUser(async (data: { id: string; role: string }, done) => {
       data.role === "client"
         ? await prisma.client.findUnique({ where: { id: data.id } })
         : await prisma.provider.findUnique({ where: { id: data.id } });
+
     done(null, user);
   } catch (error) {
     done(error, null);
