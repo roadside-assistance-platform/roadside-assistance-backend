@@ -27,11 +27,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-app.post("/create", async (req: any, res: any) => {
+app.post("/create", async (req:any, res:any) => {
   const { email, password, role } = req.body;
 
   if (!email || !password || !role) {
-    return res.status(400).send("Email, password, and role are required");
+    return res.status(400).json({ error: "Email, password, and role are required" });
   }
 
   try {
@@ -41,10 +41,11 @@ app.post("/create", async (req: any, res: any) => {
         : await prisma.provider.findUnique({ where: { email } });
 
     if (existingUser) {
-      return res.status(400).send("User already exists");
+      return res.status(400).json({ error: "User already exists" });
     }
 
     const hashedPassword = await hashPassword(password);
+
     const newUser =
       role === "client"
         ? await prisma.client.create({ data: { email, password: hashedPassword } })
@@ -53,7 +54,7 @@ app.post("/create", async (req: any, res: any) => {
     res.status(201).json(newUser);
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred while creating the user");
+    res.status(500).json({ error: "An error occurred while creating the user" });
   }
 });
 
@@ -89,6 +90,9 @@ app.get("/logout", (req: Request, res: Response) => {
     res.redirect("/login");
   });
 });
+
+
+export default prisma;
 
 // Start the server
 prisma.$connect()
