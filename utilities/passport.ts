@@ -2,14 +2,14 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { PrismaClient } from "@prisma/client";
-import { comparePassword } from "./bcrypt";
+import { comparePassword, hashPassword } from "./bcrypt";
 
 const prisma = new PrismaClient();
 
 const GOOGLE_CLIENT_ID = "your-google-client-id";
 const GOOGLE_CLIENT_SECRET = "your-google-client-secret";
 
-// Client Authentication Strategy
+// Client Local Authentication
 passport.use(
   "client-local",
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
@@ -29,7 +29,7 @@ passport.use(
   })
 );
 
-// Provider Authentication Strategy
+// Provider Local Authentication
 passport.use(
   "provider-local",
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
@@ -49,7 +49,7 @@ passport.use(
   })
 );
 
-// Google Authentication Strategy
+// Google Authentication
 passport.use(
   new GoogleStrategy(
     {
@@ -77,7 +77,8 @@ passport.use(
           user = await prisma.client.create({
             data: {
               email,
-              name: profile.displayName,
+              password: await hashPassword("random-generated-password"),
+              fullName: profile.displayName,
             },
           });
         }
