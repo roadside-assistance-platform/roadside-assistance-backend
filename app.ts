@@ -18,14 +18,20 @@ const PORT = process.env.PORT || 3000;
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "default_secret",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 86400000 }, // 1 day
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET || "default_secret",
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: { maxAge: 86400000 }, // 1 day
+//   })
+// );
+app.use(session({
+  secret: process.env.SESSION_SECRET || "your_secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // Set to `true` in production with HTTPS
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -49,6 +55,24 @@ app.get("/logout", (req: Request, res: Response) => {
   });
 });
 
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Google OAuth callback route
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/auth/google/failure" }),
+  (req, res) => {
+    res.json({ message: "Google authentication successful", user: req.user });
+  }
+);
+
+// Failure route
+app.get("/auth/google/failure", (req, res) => {
+  res.status(401).json({ message: "Google authentication failed" });
+});
 
 
 
