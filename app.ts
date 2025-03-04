@@ -55,25 +55,41 @@ app.get("/logout", (req: Request, res: Response) => {
   });
 });
 
+// Google OAuth for Clients
 app.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  "/auth/google/client",
+  passport.authenticate("google-client", { scope: ["profile", "email"] })
 );
 
-// Google OAuth callback route
 app.get(
-  "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/auth/google/failure" }),
+  "/auth/google/client/callback",
+  passport.authenticate("google-client", { failureRedirect: "/auth/google/client/failure" }),
   (req, res) => {
     res.json({ message: "Google authentication successful", user: req.user });
   }
 );
 
-// Failure route
-app.get("/auth/google/failure", (req, res) => {
-  res.status(401).json({ message: "Google authentication failed" });
+app.get("/auth/google/client/failure", (req, res) => {
+  res.status(401).json({ message: "Google authentication failed for client" });
 });
 
+// Google OAuth for Providers
+app.get(
+  "/auth/google/provider",
+  passport.authenticate("google-provider", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/google/provider/callback",
+  passport.authenticate("google-provider", { failureRedirect: "/auth/google/provider/failure" }),
+  (req, res) => {
+    res.json({ message: "Google authentication successful", user: req.user });
+  }
+);
+
+app.get("/auth/google/provider/failure", (req, res) => {
+  res.status(401).json({ message: "Google authentication failed for provider" });
+});
 
 
 export default prisma;
