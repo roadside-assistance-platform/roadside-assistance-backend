@@ -51,14 +51,14 @@ passport.use(
   })
 );
 
-// Google Authentication Strategy
 passport.use(
+  "google-client",
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:8080/auth/google/callback",
-      scope: ["profile", "email"], // Ensuring necessary profile details are received
+      callbackURL: process.env.GOOGLE_CLIENT_CALLBACK_URL || "http://localhost:8080/auth/google/client/callback",
+      scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -66,33 +66,65 @@ passport.use(
         if (!email) return done(null, false, { message: "No email found" });
 
         let user = await prisma.client.findUnique({ where: { email } });
-        let role = "client";
 
         if (!user) {
-          user = await prisma.provider.findUnique({ where: { email } });
-          role = "provider";
-        }
-
-        if (!user) {
-          // Generate and hash a random password
           const randomPassword = generateRandomPassword();
           const hashedPassword = await hashPassword(randomPassword);
 
-          // If user does not exist, create a new client by default with a random password
           user = await prisma.client.create({
             data: {
               email,
               fullName: profile.displayName,
-              password: hashedPassword, // Store hashed random password
+              password: hashedPassword,
             },
           });
 
-          console.log(`New user created with random password: ${randomPassword}`);
+          console.log(`New client created with random password: ${randomPassword}`);
         }
 
-        return done(null, { ...user, role });
+        return done(null, { ...user, role: "client" });
       } catch (error) {
-        console.error("Error in Google authentication:", error);
+        console.error("Error in Google authentication (Client):", error);
+        return done(error);
+      }
+    }
+  )
+);
+
+passport.use(
+  "google-provider",
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      callbackURL: process.env.GOOGLE_PROVIDER_CALLBACK_URL || "http://localhost:8080/auth/google/provider/callback",
+      scope: ["profile", "email"],
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+        if (!email) return done(null, false, { message: "No email found" });
+
+        let user = await prisma.provider.findUnique({ where: { email } });
+
+        if (!user) {
+          const randomPassword = generateRandomPassword();
+          const hashedPassword = await hashPassword(randomPassword);
+
+          user = await prisma.provider.create({
+            data: {
+              email,
+              fullName: profile.displayName,
+              password: hashedPassword,
+            },
+          });
+
+          console.log(`New provider created with random password: ${randomPassword}`);
+        }
+
+        return done(null, { ...user, role: "provider" });
+      } catch (error) {
+        console.error("Error in Google authentication (Provider):", error);
         return done(error);
       }
     }
