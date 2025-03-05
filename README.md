@@ -36,7 +36,7 @@ The backend follows the MVC architectural pattern.
 
 ## API Documentation
 
-The API documentation is available at .
+The API documentation is available at  http://localhost:8080/api-docs
 
 ## Contribution Guidelines
 
