@@ -1,3 +1,53 @@
+/**
+ * @swagger
+ * /client/login:
+ *   post:
+ *     summary: Client login
+ *     description: Authenticates a client using local strategy and logs them in.
+ *     tags:
+ *       - Client
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: client@example.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Login successful
+ *                 Client:
+ *                   $ref: '#/components/schemas/Client'
+ *       401:
+ *         description: Authentication failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Authentication failed
+ *                 info:
+ *                   type: object
+ *                   example: {}
+ *       500:
+ *         description: Internal server error
+ */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
 import {Client} from "@prisma/client"// Ensure this matches your Client type definition
