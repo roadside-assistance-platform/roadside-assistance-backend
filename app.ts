@@ -10,6 +10,8 @@ import passport from "./utilities/passport";
 import loginProvider from "./routes/provider/login";
 import loginClient from "./routes/client/login";
 import createUser from "./routes/create";
+import clientGoogleAuth from "./routes/client/googleAuth";
+import providerGoogleAuth from "./routes/provider/googleAuth";
 import home from "./routes/home/home";
 
 dotenv.config();
@@ -81,41 +83,9 @@ app.get("/logout", (req: Request, res: Response) => {
 });
 
 // Google OAuth for Clients
-app.get(
-  "/auth/google/client",
-  passport.authenticate("google-client", { scope: ["profile", "email"] })
-);
-
-app.get(
-  "/auth/google/client/callback",
-  passport.authenticate("google-client", { failureRedirect: "/auth/google/client/failure" }),
-  (req, res) => {
-    res.json({ message: "Google authentication successful", user: req.user });
-  }
-);
-
-app.get("/auth/google/client/failure", (req, res) => {
-  res.status(401).json({ message: "Google authentication failed for client" });
-});
-
+app.use("/", clientGoogleAuth);
 // Google OAuth for Providers
-app.get(
-  "/auth/google/provider",
-  passport.authenticate("google-provider", { scope: ["profile", "email"] })
-);
-
-app.get(
-  "/auth/google/provider/callback",
-  passport.authenticate("google-provider", { failureRedirect: "/auth/google/provider/failure" }),
-  (req, res) => {
-    res.json({ message: "Google authentication successful", user: req.user });
-  }
-);
-
-app.get("/auth/google/provider/failure", (req, res) => {
-  res.status(401).json({ message: "Google authentication failed for provider" });
-});
-
+app.use("/", providerGoogleAuth);
 
 export default prisma;
 
