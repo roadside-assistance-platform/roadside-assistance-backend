@@ -1,8 +1,11 @@
 import express, { Application } from "express";
 import { Request, Response } from "express";
 import dotenv from "dotenv";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 import { PrismaClient } from "@prisma/client";
 import session from "express-session";
+import logger from "./utilities/logger";
 import passport from "./utilities/passport";
 import loginProvider from "./routes/provider/login";
 import loginClient from "./routes/client/login";
@@ -10,10 +13,32 @@ import createUser from "./routes/create";
 import home from "./routes/home/home";
 
 dotenv.config();
-
 const app: Application = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
+
+
+//swagger
+
+const options: swaggerJsdoc.Options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "API Documentation",
+      version: "1.0.0",
+      description: "This is the API documentation",
+    },
+  },
+  apis: ["./routes/**/*.ts"], // Path to the API docs
+};
+
+// Generate Swagger documentation
+const swaggerSpec = swaggerJsdoc(options);
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
 
 // Middlewares
 app.use(express.json());
@@ -98,7 +123,7 @@ export default prisma;
 prisma.$connect()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      logger.info(`Server running on http://localhost:${PORT}`);
     });
   })
   .catch((e) => {
