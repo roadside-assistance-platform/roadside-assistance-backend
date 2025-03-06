@@ -13,6 +13,7 @@ import createUser from "./routes/create";
 import clientGoogleAuth from "./routes/client/googleAuth";
 import providerGoogleAuth from "./routes/provider/googleAuth";
 import createClient from "./routes/client/create2";
+import createProvider from "./routes/provider/create2";
 import home from "./routes/home/home";
 
 dotenv.config();
@@ -76,6 +77,7 @@ app.use("/", clientGoogleAuth);
 
 //provider
 app.use("/provider/login", loginProvider);
+app.use("/provider/create", createProvider);
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 

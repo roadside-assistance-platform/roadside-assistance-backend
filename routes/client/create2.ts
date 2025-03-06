@@ -5,7 +5,7 @@ import logger from "../../utilities/logger";
 const router = Router();
 
 router.put("/", async (req: any, res: any) => {
-  const { id, phone, photo } = req.body;
+  const { id, phone, photo, fullName } = req.body;
 
   logger.info(`Received update request for client ID: ${id}`);
 
@@ -14,9 +14,9 @@ router.put("/", async (req: any, res: any) => {
     return res.status(400).send("Client ID is required");
   }
 
-  if (!phone && !photo) {
+  if (!phone && !photo && !fullName) {
     logger.warn(`No fields provided for update in client ID: ${id}`);
-    return res.status(400).send("At least one field (phone or photo) is required");
+    return res.status(400).send("At least one field (phone, photo, or fullName) is required");
   }
 
   try {
@@ -36,6 +36,7 @@ router.put("/", async (req: any, res: any) => {
       data: {
         phone: phone || existingClient.phone,
         photo: photo || existingClient.photo,
+        fullName: fullName || existingClient.fullName,
       },
     });
 
