@@ -12,6 +12,7 @@ import loginClient from "./routes/client/login";
 import createUser from "./routes/create";
 import clientGoogleAuth from "./routes/client/googleAuth";
 import providerGoogleAuth from "./routes/provider/googleAuth";
+import createClient from "./routes/client/create2";
 import home from "./routes/home/home";
 
 dotenv.config();
@@ -63,13 +64,22 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-// app.use("/create", require("./routes/create"));
-// app.use("/login", require("./routes/client/login"));
-// app.use("/login", require("./routes/provider/login"));
+
 
 app.use("/create", createUser);
+
+//client
 app.use("/client/login", loginClient);
+app.use("/client/create", createClient);
+// Google OAuth for Clients
+app.use("/", clientGoogleAuth);
+
+//provider
 app.use("/provider/login", loginProvider);
+// Google OAuth for Providers
+app.use("/", providerGoogleAuth);
+
+//home
 app.use("/home", home);
 
 
@@ -82,10 +92,8 @@ app.get("/logout", (req: Request, res: Response) => {
   });
 });
 
-// Google OAuth for Clients
-app.use("/", clientGoogleAuth);
-// Google OAuth for Providers
-app.use("/", providerGoogleAuth);
+
+
 
 export default prisma;
 
