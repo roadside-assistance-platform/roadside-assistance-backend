@@ -20,6 +20,29 @@ dotenv.config();
 const app: Application = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
+const swaggerJSDoc = require('swagger.jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+
+//swagger integration
+const options ={
+  definition: {
+    openapi : '3.0.0',
+    info : {
+      title: 'roadside-assistance-platform',
+      version: '1.0.0'
+    },
+    servers: [
+    {
+      url : 'http://localhost:3000'
+    }
+  ]
+  },
+  apis: ['./app.ts']
+}
+
+const swaggerSpec = swaggerJSDoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 //swagger
