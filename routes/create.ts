@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /:
+ * /create:
  *   post:
  *     summary: Create a new user
  *     description: Creates a new user with the provided email, password, and role. The role can be either "client" or "provider".
