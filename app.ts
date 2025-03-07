@@ -10,6 +10,10 @@ import passport from "./utilities/passport";
 import loginProvider from "./routes/provider/login";
 import loginClient from "./routes/client/login";
 import createUser from "./routes/create";
+import clientGoogleAuth from "./routes/client/googleAuth";
+import providerGoogleAuth from "./routes/provider/googleAuth";
+import createClient from "./routes/client/create2";
+import createProvider from "./routes/provider/create2";
 import home from "./routes/home/home";
 
 dotenv.config();
@@ -61,13 +65,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-// app.use("/create", require("./routes/create"));
-// app.use("/login", require("./routes/client/login"));
-// app.use("/login", require("./routes/provider/login"));
+
 
 app.use("/create", createUser);
+
+//client
 app.use("/client/login", loginClient);
+app.use("/client/create", createClient);
+// Google OAuth for Clients
+app.use("/", clientGoogleAuth);
+
+//provider
 app.use("/provider/login", loginProvider);
+app.use("/provider/create", createProvider);
+// Google OAuth for Providers
+app.use("/", providerGoogleAuth);
+
+//home
 app.use("/home", home);
 
 
@@ -80,41 +94,7 @@ app.get("/logout", (req: Request, res: Response) => {
   });
 });
 
-// Google OAuth for Clients
-app.get(
-  "/auth/google/client",
-  passport.authenticate("google-client", { scope: ["profile", "email"] })
-);
 
-app.get(
-  "/auth/google/client/callback",
-  passport.authenticate("google-client", { failureRedirect: "/auth/google/client/failure" }),
-  (req, res) => {
-    res.json({ message: "Google authentication successful", user: req.user });
-  }
-);
-
-app.get("/auth/google/client/failure", (req, res) => {
-  res.status(401).json({ message: "Google authentication failed for client" });
-});
-
-// Google OAuth for Providers
-app.get(
-  "/auth/google/provider",
-  passport.authenticate("google-provider", { scope: ["profile", "email"] })
-);
-
-app.get(
-  "/auth/google/provider/callback",
-  passport.authenticate("google-provider", { failureRedirect: "/auth/google/provider/failure" }),
-  (req, res) => {
-    res.json({ message: "Google authentication successful", user: req.user });
-  }
-);
-
-app.get("/auth/google/provider/failure", (req, res) => {
-  res.status(401).json({ message: "Google authentication failed for provider" });
-});
 
 
 export default prisma;

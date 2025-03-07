@@ -51,19 +51,27 @@
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
 import {Client} from "@prisma/client"// Ensure this matches your Client type definition
+import logger from "../../utilities/logger";
 
 const router = Router();
 
 router.post("/", (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("client-local", (err: Error | null, Client: Client | false, info: unknown) => {
     if (err) return next(err); // Handle errors
-    if (!Client) return res.status(401).json({ message: "Authentication failed", info });
+
+    if (!Client) {
+      logger.error({ message: "Authentication failed", info }); // Log before returning
+      return res.status(401).json({ message: "Authentication failed", info });
+    }
 
     req.logIn(Client, (loginErr: Error | null) => {
       if (loginErr) return next(loginErr);
+
+      logger.info({ message: "Login successful", Client }); // Use info level for successful login
       return res.json({ message: "Login successful", Client });
     });
   })(req, res, next);
 });
+
 
 export default router;
