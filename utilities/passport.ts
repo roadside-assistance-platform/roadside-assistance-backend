@@ -139,16 +139,22 @@ passport.serializeUser((user: any, done) => {
 // Deserialize User
 passport.deserializeUser(async (data: { id: string; role: string }, done) => {
   try {
-    const user =
-      data.role === "client"
-        ? await prisma.client.findUnique({ where: { id: data.id } })
-        : await prisma.provider.findUnique({ where: { id: data.id } });
-
+    let user: any;
+    if (data.role === "client") {
+      user = await prisma.client.findUnique({ where: { id: data.id } });
+    } else if (data.role === "provider") {
+      user = await prisma.provider.findUnique({ where: { id: data.id } });
+    }
+    // Attach the role to the user object, so middleware checks will work.
+    if (user) {
+      user.role = data.role;
+    }
     done(null, user);
   } catch (error) {
     console.error("Error in deserialization:", error);
     done(error, null);
   }
 });
+
 
 export default passport;

@@ -33,7 +33,7 @@ CREATE TABLE "Client" (
 CREATE TABLE "Service" (
     "id" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
-    "providerId" TEXT NOT NULL,
+    "providerId" TEXT,
     "price" INTEGER NOT NULL,
     "serviceRating" INTEGER,
     "serviceLocation" TEXT NOT NULL,
@@ -101,7 +101,7 @@ ALTER TABLE "Provider" ADD CONSTRAINT "Provider_fieldId_fkey" FOREIGN KEY ("fiel
 ALTER TABLE "Service" ADD CONSTRAINT "Service_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Service" ADD CONSTRAINT "Service_providerId_fkey" FOREIGN KEY ("providerId") REFERENCES "Provider"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Service" ADD CONSTRAINT "Service_providerId_fkey" FOREIGN KEY ("providerId") REFERENCES "Provider"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

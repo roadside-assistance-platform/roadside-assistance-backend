@@ -18,15 +18,13 @@
  *         description: User is not authenticated, redirects to login page
  */
 import Router from "express";
-import e, { Request, Response } from "express";
+import  { Request, Response } from "express";
+import logger from "../../utilities/logger";
 const router = Router();
 
 router.get("/", (req: Request, res: Response) => {
-  if (req.isAuthenticated()) {
-    res.status(200).send("Success! You are logged in.");
-  } else {
-    res.redirect("/login");
-  }
-});
+logger.info("Home page accessed");
+res.send("Success! You are in home.");});
+
 
 export default router;

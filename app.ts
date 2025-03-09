@@ -14,7 +14,9 @@ import clientGoogleAuth from "./routes/client/googleAuth";
 import providerGoogleAuth from "./routes/provider/googleAuth";
 import createClient from "./routes/client/signup";
 import createProvider from "./routes/provider/signup";
+import createService from "./routes/service/create";
 import home from "./routes/home/home";
+import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 
 dotenv.config();
 const app: Application = express();
@@ -81,19 +83,11 @@ app.use("/provider/login", loginProvider);
 app.use("/provider/create", createProvider);
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
+//service
+app.use("/service/create",isClient, createService);
 
 //home
-app.use("/home", home);
-
-
-app.get("/logout", (req: Request, res: Response) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).send("Error logging out");
-    }
-    res.redirect("/login");
-  });
-});
+app.use("/home",isAuthenticated, home);
 
 
 
