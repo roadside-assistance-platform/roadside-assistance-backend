@@ -9,11 +9,11 @@ import logger from "./utilities/logger";
 import passport from "./utilities/passport";
 import loginProvider from "./routes/provider/login";
 import loginClient from "./routes/client/login";
-import createUser from "./routes/create";
+
 import clientGoogleAuth from "./routes/client/googleAuth";
 import providerGoogleAuth from "./routes/provider/googleAuth";
-import createClient from "./routes/client/create2";
-import createProvider from "./routes/provider/create2";
+import createClient from "./routes/client/signup";
+import createProvider from "./routes/provider/signup";
 import home from "./routes/home/home";
 
 dotenv.config();
@@ -69,7 +69,6 @@ app.use(passport.session());
 // Routes
 
 
-app.use("/create", createUser);
 
 //client
 app.use("/client/login", loginClient);
