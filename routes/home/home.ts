@@ -18,7 +18,7 @@
  *         description: User is not authenticated, redirects to login page
  */
 import Router from "express";
-import e, { Request, Response } from "express";
+import  { Request, Response } from "express";
 import logger from "../../utilities/logger";
 const router = Router();
 

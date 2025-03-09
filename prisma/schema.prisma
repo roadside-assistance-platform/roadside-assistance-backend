@@ -53,7 +53,7 @@ model Client {
 model Service {
   id              String  @id @default(uuid())
   clientId        String
-  providerId      String
+  providerId      String?
   price           Int
   serviceRating   Int?
   serviceLocation String
@@ -62,7 +62,7 @@ model Service {
   updatedAt       DateTime @updatedAt
 
   client   Client   @relation(fields: [clientId], references: [id])
-  provider Provider @relation(fields: [providerId], references: [id])
+  provider Provider? @relation(fields: [providerId], references: [id])
   comments Comment[]
 }
 
