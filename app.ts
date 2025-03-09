@@ -15,6 +15,7 @@ import providerGoogleAuth from "./routes/provider/googleAuth";
 import createClient from "./routes/client/signup";
 import createProvider from "./routes/provider/signup";
 import home from "./routes/home/home";
+import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 
 dotenv.config();
 const app: Application = express();
@@ -83,7 +84,7 @@ app.use("/provider/create", createProvider);
 app.use("/", providerGoogleAuth);
 
 //home
-app.use("/home", home);
+app.use("/home",isAuthenticated, home);
 
 
 app.get("/logout", (req: Request, res: Response) => {
