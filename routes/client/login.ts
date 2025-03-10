@@ -57,7 +57,10 @@ const router = Router();
 
 router.post("/", (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("client-local", (err: Error | null, Client: Client | false, info: unknown) => {
-    if (err) return next(err); // Handle errors
+    if (err){
+      logger.error("Error logging in client:", err);
+      return next(err);
+    }  // Handle errors
 
     if (!Client) {
       logger.error({ message: "Authentication failed", info }); // Log before returning
@@ -65,9 +68,11 @@ router.post("/", (req: Request, res: Response, next: NextFunction) => {
     }
 
     req.logIn(Client, (loginErr: Error | null) => {
-      if (loginErr) return next(loginErr);
+      if (loginErr) {
+        logger.error({ message: "Error logging in client", loginErr });
+        return next(loginErr);}
 
-      logger.info({ message: "Login successful", Client }); // Use info level for successful login
+      logger.info(`Client logged in: ${Client.email}`); // Use info level for successful login
       return res.json({ message: "Login successful", Client });
     });
   })(req, res, next);
