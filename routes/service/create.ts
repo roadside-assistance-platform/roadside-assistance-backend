@@ -1,3 +1,63 @@
+/**
+ * @swagger
+ * /:
+ *   post:
+ *     summary: Create a new service
+ *     description: Creates a new service request by a client. If a provider ID is provided, it verifies the provider exists.
+ *     tags:
+ *       - Services
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - price
+ *               - serviceLocation
+ *             properties:
+ *               providerId:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Optional provider ID for the service.
+ *               price:
+ *                 type: number
+ *                 description: Price of the service.
+ *               serviceLocation:
+ *                 type: string
+ *                 description: Location where the service is needed.
+ *     responses:
+ *       201:
+ *         description: Service successfully created.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Unique identifier of the created service.
+ *                 clientId:
+ *                   type: string
+ *                   description: ID of the client who created the service.
+ *                 providerId:
+ *                   type: string
+ *                   nullable: true
+ *                   description: ID of the provider assigned to the service (if provided).
+ *                 price:
+ *                   type: number
+ *                   description: Price of the service.
+ *                 serviceLocation:
+ *                   type: string
+ *                   description: Service location.
+ *       400:
+ *         description: Bad request, required fields are missing.
+ *       404:
+ *         description: Provider not found.
+ *       500:
+ *         description: Internal server error.
+ */
+
 import { Router } from "express";
 import prisma from "../../app";
 import logger from "../../utilities/logger";

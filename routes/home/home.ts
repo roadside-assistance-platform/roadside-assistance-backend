@@ -1,9 +1,9 @@
 /**
  * @swagger
- * /home:
+ * /:
  *   get:
  *     summary: Home page
- *     description: Access the home page. Redirects to login if user is not authenticated.
+ *     description: Returns a success message if the user is authenticated; otherwise, redirects to the login page.
  *     tags:
  *       - Home
  *     responses:
@@ -13,10 +13,11 @@
  *           text/plain:
  *             schema:
  *               type: string
- *               example: Success! You are logged in.
+ *               example: Success! You are in home.
  *       302:
- *         description: User is not authenticated, redirects to login page
+ *         description: User is not authenticated and is redirected to the login page.
  */
+
 import Router from "express";
 import  { Request, Response } from "express";
 import logger from "../../utilities/logger";
