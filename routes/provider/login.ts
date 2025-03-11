@@ -14,15 +14,18 @@
  *         email:
  *           type: string
  *           format: email
- *           description: The provider's email
+ *           description: The provider's email address
  *         name:
  *           type: string
- *           description: The provider's name
+ *           description: The provider's full name
+ *         password:
+ *           type: string
+ *           description: The provider's hashed password (not returned in responses)
  * 
  * /provider/login:
  *   post:
  *     summary: Provider login
- *     description: Authenticates a provider using local strategy and logs them in.
+ *     description: Authenticates a provider using email and password and logs them in.
  *     tags:
  *       - Provider
  *     requestBody:
@@ -31,13 +34,19 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - password
  *             properties:
- *               username:
+ *               email:
  *                 type: string
+ *                 format: email
  *                 example: provider@example.com
+ *                 description: The provider's email address
  *               password:
  *                 type: string
  *                 example: password123
+ *                 description: The provider's password
  *     responses:
  *       200:
  *         description: Login successful
@@ -49,7 +58,7 @@
  *                 message:
  *                   type: string
  *                   example: Login successful
- *                 Provider:
+ *                 provider:
  *                   $ref: '#/components/schemas/Provider'
  *       401:
  *         description: Authentication failed
@@ -61,11 +70,22 @@
  *                 message:
  *                   type: string
  *                   example: Authentication failed
- *                 info:
- *                   type: object
- *                   example: {}
+ *                 details:
+ *                   type: string
+ *                   example: Invalid email or password
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: An unexpected error occurred
+ *                 details:
+ *                   type: string
+ *                   example: Database connection failed
  */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
