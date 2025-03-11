@@ -1,10 +1,10 @@
+
 /**
  * @swagger
- * /client:
+ * /client/signup:
  *   post:
  *     summary: Create a new client
- *     description: Creates a new client with the provided details. All fields are required.
- *     tags:
+ *     tags: 
  *       - Client
  *     requestBody:
  *       required: true
@@ -21,51 +21,53 @@
  *             properties:
  *               email:
  *                 type: string
- *                 description: The client's email address.
- *                 example: client@example.com
+ *                 format: email
+ *                 example: user@example.com
  *               password:
  *                 type: string
- *                 description: The client's password (will be hashed before storage).
- *                 example: securePassword123
+ *                 example: password123
  *               fullName:
  *                 type: string
- *                 description: The client's full name.
  *                 example: John Doe
  *               phone:
  *                 type: string
- *                 description: The client's phone number.
- *                 example: +1234567890
+ *                 example: "+1234567890"
  *               photo:
  *                 type: string
- *                 description: URL or base64-encoded string of the client's photo.
- *                 example: https://example.com/photo.jpg
+ *                 format: uri
+ *                 example: "http://example.com/photo.jpg"
  *     responses:
  *       201:
- *         description: Client created successfully.
+ *         description: Client created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Client'
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 fullName:
+ *                   type: string
+ *                 phone:
+ *                   type: string
+ *                 photo:
+ *                   type: string
  *       400:
- *         description: Bad request. Missing required fields or client with the same email/phone already exists.
+ *         description: Bad request, missing required fields or client already exists
  *         content:
- *           application/json:
+ *           text/plain:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: All fields are required: email, password, fullName, phone, photo
+ *               type: string
+ *               example: "All fields are required: email, password, fullName, phone, photo"
  *       500:
- *         description: Internal server error occurred while creating the client.
+ *         description: Internal server error
  *         content:
- *           application/json:
+ *           text/plain:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: An error occurred while creating the client
+ *               type: string
+ *               example: "An error occurred while creating the client"
  */
 import prisma from "../../app";
 import { hashPassword } from "../../utilities/bcrypt";
