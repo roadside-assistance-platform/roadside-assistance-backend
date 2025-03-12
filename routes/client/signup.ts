@@ -1,3 +1,34 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Client:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *         - fullName
+ *         - phone
+ *         - photo
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: user@example.com
+ *         password:
+ *           type: string
+ *           example: password123
+ *         fullName:
+ *           type: string
+ *           example: John Doe
+ *         phone:
+ *           type: string
+ *           example: "+1234567890"
+ *         photo:
+ *           type: string
+ *           format: uri
+ *           example: "http://example.com/photo.jpg"
+ */
 
 /**
  * @swagger
@@ -11,49 +42,14 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *               - fullName
- *               - phone
- *               - photo
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
- *               password:
- *                 type: string
- *                 example: password123
- *               fullName:
- *                 type: string
- *                 example: John Doe
- *               phone:
- *                 type: string
- *                 example: "+1234567890"
- *               photo:
- *                 type: string
- *                 format: uri
- *                 example: "http://example.com/photo.jpg"
+ *             $ref: '#/components/schemas/Client'
  *     responses:
  *       201:
  *         description: Client created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 email:
- *                   type: string
- *                 fullName:
- *                   type: string
- *                 phone:
- *                   type: string
- *                 photo:
- *                   type: string
+ *               $ref: '#/components/schemas/Client'
  *       400:
  *         description: Bad request, missing required fields or client already exists
  *         content:
@@ -69,6 +65,7 @@
  *               type: string
  *               example: "An error occurred while creating the client"
  */
+
 import prisma from "../../app";
 import { hashPassword } from "../../utilities/bcrypt";
 import { Router } from "express";

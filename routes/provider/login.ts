@@ -1,27 +1,5 @@
 /**
  * @swagger
- * components:
- *   schemas:
- *     Provider:
- *       type: object
- *       required:
- *         - id
- *         - email
- *       properties:
- *         id:
- *           type: string
- *           description: The provider's unique ID
- *         email:
- *           type: string
- *           format: email
- *           description: The provider's email address
- *         name:
- *           type: string
- *           description: The provider's full name
- *         password:
- *           type: string
- *           description: The provider's hashed password (not returned in responses)
- * 
  * /provider/login:
  *   post:
  *     summary: Provider login
