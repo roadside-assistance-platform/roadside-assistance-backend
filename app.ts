@@ -18,6 +18,8 @@ import createService from "./routes/service/create";
 import home from "./routes/home/home";
 import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 
+const { sendEmail } = require('.utilities/mailsender.ts');
+
 dotenv.config();
 const app: Application = express();
 const prisma = new PrismaClient();
