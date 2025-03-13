@@ -76,13 +76,13 @@ app.use(passport.session());
 
 //client
 app.use("/client/login", loginClient);
-app.use("/client/create", createClient);
+app.use("/client/signup", createClient);
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
 
 //provider
 app.use("/provider/login", loginProvider);
-app.use("/provider/create", createProvider);
+app.use("/provider/signup", createProvider);
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 //service

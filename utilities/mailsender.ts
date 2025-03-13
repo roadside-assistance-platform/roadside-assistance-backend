@@ -10,7 +10,7 @@ interface EmailOptions {
   from?: string;
   cc?: string;
   bcc?: string;
-  attachments?: nodemailer.Attachment[];
+  attachments?:nodemailer.Attachment[];
 }
 
 
