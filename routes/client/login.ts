@@ -35,7 +35,7 @@
  *                 message:
  *                   type: string
  *                   example: Login successful
- *                 client:
+ *                 Client:
  *                   $ref: '#/components/schemas/Client'
  *       401:
  *         description: Authentication failed due to invalid credentials.
