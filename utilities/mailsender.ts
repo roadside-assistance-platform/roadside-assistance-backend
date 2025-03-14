@@ -1,5 +1,7 @@
 // emailUtils.ts
-import nodemailer, { Transporter, SendMailOptions, SentMessageInfo } from 'nodemailer';
+import nodemailer from 'nodemailer';
+import { Transporter, SendMailOptions, SentMessageInfo } from 'nodemailer';
+import { Attachment } from 'nodemailer/lib/mailer';
 
 
 interface EmailOptions {
@@ -10,7 +12,7 @@ interface EmailOptions {
   from?: string;
   cc?: string;
   bcc?: string;
-  attachments?:nodemailer.Attachment[];
+  attachments?: Attachment[];
 }
 
 
