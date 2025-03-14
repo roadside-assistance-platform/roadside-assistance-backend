@@ -36,7 +36,7 @@
  *                 message:
  *                   type: string
  *                   example: Login successful
- *                 provider:
+ *                 Provider:
  *                   $ref: '#/components/schemas/Provider'
  *       401:
  *         description: Authentication failed
