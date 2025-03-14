@@ -18,7 +18,7 @@ import createService from "./routes/service/create";
 import home from "./routes/home/home";
 import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 
-import {sendEmail} from "./utilities/mailsender"
+import { sendMail } from "./utilities/mailsender"
 
 dotenv.config();
 const app: Application = express();
@@ -90,9 +90,6 @@ app.use("/service/create",isClient, createService);
 
 //home
 app.use("/home",isAuthenticated, home);
-
-
-
 
 export default prisma;
 
