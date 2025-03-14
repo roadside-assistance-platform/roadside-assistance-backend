@@ -13,10 +13,10 @@
  *           schema:
  *             type: object
  *             required:
- *               - username
+ *               - email
  *               - password
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *                 description: The client's email or username.
  *                 example: client@example.com
