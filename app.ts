@@ -15,6 +15,8 @@ import providerGoogleAuth from "./routes/provider/googleAuth";
 import createClient from "./routes/client/signup";
 import createProvider from "./routes/provider/signup";
 import createService from "./routes/service/create";
+import updateClient from "./routes/client/update"
+import updateProvider from "./routes/provider/update"
 import home from "./routes/home/home";
 import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 
@@ -77,12 +79,14 @@ app.use(passport.session());
 //client
 app.use("/client/login", loginClient);
 app.use("/client/signup", createClient);
+app.use("/client/update",isClient,updateClient)
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
 
 //provider
 app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
+app.use("/provider/update",isProvider,updateProvider)
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 //service
