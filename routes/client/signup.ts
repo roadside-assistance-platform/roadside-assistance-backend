@@ -9,7 +9,6 @@
  *         - password
  *         - fullName
  *         - phone
- *         - photo
  *       properties:
  *         email:
  *           type: string
@@ -28,6 +27,7 @@
  *           type: string
  *           format: uri
  *           example: "http://example.com/photo.jpg"
+ *           nullable: true
  */
 
 /**
@@ -56,7 +56,7 @@
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "All fields are required: email, password, fullName, phone, photo"
+ *               example: "All fields are required: email, password, fullName, phone"
  *       500:
  *         description: Internal server error
  *         content:
@@ -80,12 +80,11 @@ const createUser = async (role: string, data: any) => {
   }
 };
 
-
 router.post("/", async (req: any, res: any) => {
   const { email, password, fullName, phone, photo } = req.body;
-  if (!email || !password || !fullName || !phone || !photo) {
-    logger.error("All fields are required: email, password, fullName, phone, photo");
-    return res.status(400).send("All fields are required: email, password, fullName, phone, photo");
+  if (!email || !password || !fullName || !phone) {
+    logger.error("All fields are required: email, password, fullName, phone");
+    return res.status(400).send("All fields are required: email, password, fullName, phone");
   }
 
   try {
@@ -100,12 +99,13 @@ router.post("/", async (req: any, res: any) => {
     }
 
     const hashedPassword = await hashPassword(password);
-    const newUser = await createUser("client", { email, password: hashedPassword, fullName, phone, photo });
-logger.info(`New client created: ${email}`);
+    const newUser = await createUser("client", { email, password: hashedPassword, fullName, phone, photo: photo || null });
+    logger.info(`New client created: ${email}`);
     res.status(201).json(newUser);
   } catch (error) {
     logger.error(error);
     res.status(500).send("An error occurred while creating the client");
   }
 });
+
 export default router;
