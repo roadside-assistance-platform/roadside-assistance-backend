@@ -18,9 +18,11 @@ import createService from "./routes/service/create";
 import updateClient from "./routes/client/update"
 import updateProvider from "./routes/provider/update"
 import home from "./routes/home/home";
+import verifygoogleToken from "./routes/google";
 import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 
 import { sendMail } from "./utilities/mailsender"
+
 
 dotenv.config();
 const app: Application = express();
@@ -74,6 +76,7 @@ app.use(passport.session());
 
 // Routes
 
+app.use("/google/verify", verifygoogleToken);
 
 
 //client
