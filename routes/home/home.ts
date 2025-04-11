@@ -27,7 +27,7 @@ const router = Router();
 router.get("/", (req: Request, res: Response) => {
 logger.info("Home page accessed");
 sendMail(
-    '1ncepti0nteamctf@gmail.com',
+    'alpha@gmail.com',
     'animemino19@gmail.com',
     'Test Subject',
     'This is a test email.',
