@@ -66,13 +66,27 @@
  *               example: "An error occurred while updating the provider"
  */
 
+import { Router, Request, Response, NextFunction } from "express";
 import prisma from "../../app";
 import { hashPassword } from "../../utilities/bcrypt";
-import { Router } from "express";
 import logger from "../../utilities/logger";
+import { isProvider } from "../../middleware/auth";
+import { validateRequest } from "../../middleware/validation";
+
 const router = Router();
 
-router.put("/:id", async (req:any, res:any) => {
+// Validation rules for provider update
+const providerUpdateRules = {
+  email: { type: 'string', format: 'email', optional: true },
+  password: { type: 'string', min: 8, optional: true },
+  fullName: { type: 'string', min: 2, optional: true },
+  phone: { type: 'string', pattern: /^\+?[1-9]\d{1,14}$/, optional: true },
+  photo: { type: 'string', format: 'uri', optional: true }
+};
+
+import { catchAsync } from '../../utilities/catchAsync';
+
+router.put("/:id", validateRequest(providerUpdateRules), catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const updateData = req.body;
 
@@ -99,15 +113,15 @@ router.put("/:id", async (req:any, res:any) => {
 
     const updatedUser = await prisma.provider.update({
       where: { id },
-      data: updateData,
+      data: updateData
     });
 
-    logger.info(`Provider updated: ${id}`);
+    logger.info(`Provider updated successfully`);
     res.status(200).json(updatedUser);
   } catch (error) {
-    logger.error(error);
+    logger.error(`Error updating provider:`, error);
     res.status(500).send("An error occurred while updating the provider");
   }
-});
+}));
 
 export default router;

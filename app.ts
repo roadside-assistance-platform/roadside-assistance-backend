@@ -1,5 +1,4 @@
-import express, { Application } from "express";
-import { Request, Response } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
@@ -20,14 +19,15 @@ import updateProvider from "./routes/provider/update"
 import home from "./routes/home/home";
 import verifygoogleToken from "./routes/google";
 import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
+import { NotFoundError } from './errors/notFound.error';
 
 import { sendMail } from "./utilities/mailsender"
 
 
 dotenv.config();
 const app: Application = express();
-const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3000;
+export const prisma = new PrismaClient();
+const PORT = process.env.PORT || 5555;
 
 
 
@@ -38,12 +38,199 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "API Documentation",
+      title: "Roadside Assistance API Documentation",
       version: "1.0.0",
-      description: "This is the API documentation",
+      description: "API documentation for the Roadside Assistance platform",
+      contact: {
+        name: "API Support",
+        email: "support@roadsideassistance.com"
+      }
     },
+    servers: [
+      {
+        url: "http://localhost:" + PORT,
+        description: "Development server"
+      }
+    ],
+    components: {
+      schemas: {
+        Provider: {
+          type: "object",
+          required: ["id", "email", "fullName", "phone"],
+          properties: {
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Provider's unique identifier"
+            },
+            email: {
+              type: "string",
+              format: "email",
+              description: "Provider's email address"
+            },
+            fullName: {
+              type: "string",
+              description: "Provider's full name"
+            },
+            phone: {
+              type: "string",
+              description: "Provider's phone number"
+            },
+            photo: {
+              type: "string",
+              format: "uri",
+              description: "URL to provider's photo"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Account creation timestamp"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Last update timestamp"
+            }
+          }
+        },
+        Client: {
+          type: "object",
+          required: ["id", "email", "fullName"],
+          properties: {
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Client's unique identifier"
+            },
+            email: {
+              type: "string",
+              format: "email",
+              description: "Client's email address"
+            },
+            fullName: {
+              type: "string",
+              description: "Client's full name"
+            },
+            photo: {
+              type: "string",
+              format: "uri",
+              description: "URL to client's photo"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Account creation timestamp"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Last update timestamp"
+            }
+          }
+        },
+        Service: {
+          type: "object",
+          required: ["id", "clientId", "status", "location"],
+          properties: {
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Service request unique identifier"
+            },
+            clientId: {
+              type: "string",
+              format: "uuid",
+              description: "ID of the client requesting service"
+            },
+            providerId: {
+              type: "string",
+              format: "uuid",
+              description: "ID of the assigned provider (if any)"
+            },
+            status: {
+              type: "string",
+              enum: ["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
+              description: "Current status of the service request"
+            },
+            location: {
+              type: "object",
+              properties: {
+                latitude: {
+                  type: "number",
+                  format: "float"
+                },
+                longitude: {
+                  type: "number",
+                  format: "float"
+                },
+                address: {
+                  type: "string"
+                }
+              }
+            },
+            description: {
+              type: "string",
+              description: "Description of the service needed"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time"
+            }
+          }
+        },
+        Error: {
+          type: "object",
+          properties: {
+            status: {
+              type: "string",
+              example: "error"
+            },
+            message: {
+              type: "string"
+            },
+            errors: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            },
+            code: {
+              type: "string"
+            }
+          }
+        }
+      },
+      securitySchemes: {
+        sessionAuth: {
+          type: "apiKey",
+          in: "cookie",
+          name: "connect.sid",
+          description: "Session-based authentication using cookies"
+        },
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "JWT token-based authentication"
+        }
+      }
+    },
+    security: [
+      { sessionAuth: [] },
+      { bearerAuth: [] }
+    ],
+    tags: [
+      { name: "Client", description: "Client account management and operations" },
+      { name: "Provider", description: "Service provider account management and operations" },
+      { name: "Service", description: "Service request creation and management" },
+      { name: "Authentication", description: "Authentication and authorization operations" }
+    ]
   },
-  apis: ["./routes/**/*.ts"], // Path to the API docs
+  apis: ["./routes/**/*.ts"]
 };
 
 // Generate Swagger documentation
@@ -97,6 +284,15 @@ app.use("/service/create",isClient, createService);
 
 //home
 app.use("/home",isAuthenticated, home);
+
+// 404 handler for undefined routes
+app.all('*', (req: Request, res: Response, next: NextFunction) => {
+  next(new NotFoundError(`Can't find ${req.originalUrl} on this server!`));
+});
+
+// Global error handler
+import { globalErrorHandler } from './middleware/errorHandler';
+app.use(globalErrorHandler);
 
 export default prisma;
 

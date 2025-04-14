@@ -66,46 +66,77 @@
  *               example: "An error occurred while creating the client"
  */
 
-import prisma from "../../app";
-import { hashPassword } from "../../utilities/bcrypt";
-import { Router } from "express";
-import logger from "../../utilities/logger";
+import { Router, Request, Response, NextFunction } from 'express';
+import prisma from '../../app';
+import { hashPassword } from '../../utilities/bcrypt';
+import logger from '../../utilities/logger';
+import { catchAsync } from '../../utilities/catchAsync';
+import { validateRequest, ValidationRule } from '../../utilities/validation';
+import { ValidationError, DatabaseError } from '../../utilities/errors';
+
 const router = Router();
 
-const createUser = async (role: string, data: any) => {
-  if (role === "client") {
-    return await prisma.client.create({ data });
-  } else {
-    return await prisma.provider.create({ data });
+const clientSignupRules: ValidationRule[] = [
+  { field: 'email', type: 'email', required: true },
+  { field: 'password', type: 'string', required: true, minLength: 8, maxLength: 100 },
+  { field: 'fullName', type: 'string', required: true, minLength: 2, maxLength: 100 },
+  { field: 'phone', type: 'string', required: true, pattern: /^\+?[1-9]\d{1,14}$/ },
+  { field: 'photo', type: 'string', required: false }
+];
+
+const createUser = async (role: 'client' | 'provider', data: any) => {
+  try {
+    if (role === 'client') {
+      return await prisma.client.create({ data });
+    } else {
+      return await prisma.provider.create({ data });
+    }
+  } catch (error) {
+    throw new DatabaseError('Failed to create user');
   }
 };
 
-router.post("/", async (req: any, res: any) => {
+router.post('/', catchAsync(async (req: Request, res: Response) => {
+  // Validate request body
+  validateRequest(req, clientSignupRules);
+
   const { email, password, fullName, phone, photo } = req.body;
-  if (!email || !password || !fullName || !phone) {
-    logger.error("All fields are required: email, password, fullName, phone");
-    return res.status(400).send("All fields are required: email, password, fullName, phone");
+
+  // Check for existing user
+  const existingUser = await prisma.client.findFirst({
+    where: {
+      OR: [{ email }, { phone }],
+    },
+  });
+
+  if (existingUser) {
+    throw new ValidationError('Client with this email or phone already exists');
   }
 
-  try {
-    const existingUser = await prisma.client.findFirst({
-      where: {
-        OR: [{ email }, { phone }],
-      },
-    });
-    if (existingUser) {
-      logger.error("Client with this email or phone already exists");
-      return res.status(400).send("Client with this email or phone already exists");
+  // Hash password and create user
+  const hashedPassword = await hashPassword(password);
+  const newUser = await createUser('client', {
+    email,
+    password: hashedPassword,
+    fullName,
+    phone,
+    photo: photo || null
+  });
+
+  logger.info('New client created:', { email });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        fullName: newUser.fullName,
+        phone: newUser.phone,
+        photo: newUser.photo
+      }
     }
-
-    const hashedPassword = await hashPassword(password);
-    const newUser = await createUser("client", { email, password: hashedPassword, fullName, phone, photo: photo || null });
-    logger.info(`New client created: ${email}`);
-    res.status(201).json(newUser);
-  } catch (error) {
-    logger.error(error);
-    res.status(500).send("An error occurred while creating the client");
-  }
-});
+  });
+}));
 
 export default router;
