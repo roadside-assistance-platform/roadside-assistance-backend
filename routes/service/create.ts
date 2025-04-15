@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /:
+ * /service/create:
  *   post:
  *     summary: Create a new service
  *     description: Creates a new service request by a client. If a provider ID is provided, it verifies the provider exists.
@@ -69,9 +69,14 @@ router.post("/", async (req: any, res: any) => {
   const clientId = req.user.id; // Assuming client authentication middleware attaches user to req
 
   // Validate required fields (providerId is optional)
-  if (!price || !serviceLocation) {
-    logger.error("All fields are required: price, serviceLocation");
-    return res.status(400).send("All fields are required: price, serviceLocation");
+  if (!serviceLocation) {
+    logger.error("serviceLocation is required: serviceLocation");
+    return res.status(400).send("serviceLocation is required: serviceLocation");
+  }
+
+  if (!('price' in req.body)) {
+    logger.error("Price field is required in request");
+    return res.status(400).send("Price field is required in request");
   }
 
   try {
@@ -91,7 +96,7 @@ router.post("/", async (req: any, res: any) => {
       data: {
         clientId,
         providerId: providerId || null,
-        price,
+        price: price || 0,
         serviceLocation,
       },
     });
