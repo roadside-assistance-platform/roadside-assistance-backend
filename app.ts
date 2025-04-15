@@ -14,6 +14,7 @@ import providerGoogleAuth from "./routes/provider/googleAuth";
 import createClient from "./routes/client/signup";
 import createProvider from "./routes/provider/signup";
 import createService from "./routes/service/create";
+import updateService from "./routes/service/update";
 import updateClient from "./routes/client/update"
 import updateProvider from "./routes/provider/update"
 import home from "./routes/home/home";
@@ -280,7 +281,8 @@ app.use("/provider/update",isProvider,updateProvider)
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 //service
-app.use("/service/create",isClient, createService);
+app.use("/service/create", isClient, createService);
+app.use("/service/update", isAuthenticated, updateService);
 
 //home
 app.use("/home",isAuthenticated, home);
