@@ -67,27 +67,47 @@
  */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
-import {Provider} from "@prisma/client"// Ensure this matches your Provider type definition
+import { Provider } from "@prisma/client";
 import logger from "../../utilities/logger";
+import { AppError } from "../../utilities/errors";
+import { catchAsync } from "../../utilities/catchAsync";
 
 const router = Router();
 
-router.post("/", (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate("provider-local", (err: Error | null, Provider: Provider | false, info: unknown) => {
-    if (err){ 
-      logger.error("Error logging in provider:", err);
-      return next(err);} // Handle errors
-    if (!Provider){
-      logger.error("Authentication failed", info);
-      return res.status(401).json({ message: "Authentication failed", info });} 
+router.post("/", catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.email || !req.body.password) {
+    throw new AppError('Please provide email and password', 400);
+  }
 
-    req.logIn(Provider, (loginErr: Error | null) => {
-      if (loginErr) {logger.error("Error logging in provider:");
-        return next(loginErr);}
-      logger.info(`Provider logged in: ${Provider.email}`);
-      return res.json({ message: "Login successful", Provider });
-    });
-  })(req, res, next);
-});
+  return new Promise((resolve, reject) => {
+    passport.authenticate('provider-local', (err: Error | null, provider: Provider | false, info: unknown) => {
+      if (err) {
+        logger.error('Error during authentication:', { error: err, email: req.body.email });
+        return reject(new AppError('Authentication error occurred', 500));
+      }
+
+      if (!provider) {
+        logger.warn('Failed login attempt:', { email: req.body.email, info });
+        return reject(new AppError('Invalid email or password', 401));
+      }
+
+      req.logIn(provider, (loginErr: Error | null) => {
+        if (loginErr) {
+          logger.error('Login error:', { error: loginErr, email: req.body.email });
+          return reject(new AppError('Error logging in', 500));
+        }
+
+        logger.info('Successful login:', { email: provider.email });
+        resolve(res.status(200).json({
+          status: 'success',
+          message: 'Login successful',
+          data: {
+            provider
+          }
+        }));
+      });
+    })(req, res, next);
+  });
+}));
 
 export default router;
