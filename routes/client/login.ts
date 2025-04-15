@@ -99,7 +99,7 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
           status: 'success',
           message: 'Login successful',
           data: {
-            client: {
+            user: {
               id: client.id,
               email: client.email,
               fullName: client.fullName,
