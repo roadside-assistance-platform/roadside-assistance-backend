@@ -102,7 +102,9 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
             client: {
               id: client.id,
               email: client.email,
-              fullName: client.fullName
+              fullName: client.fullName,
+              phone: client.phone,
+              photo: client.photo
             }
           }
         }));
