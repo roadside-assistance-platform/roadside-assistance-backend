@@ -102,8 +102,35 @@ router.post("/", async (req: any, res: any) => {
     const hashedPassword = await hashPassword(password);
     const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo });
     logger.info(`New provider created: ${email}`);
-    res.status(201).json(newUser);
+    
+    // Add role to the user object before login
+    const userWithRole = { ...newUser, role: 'provider' };
+    
+    req.login(userWithRole, (err: any) => {
+      if (err) {
+        logger.error('Error logging in after signup:', err);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Failed to login after signup',
+          error: err.message
+        });
+      }
 
+      res.status(201).json({
+        status: 'success',
+        message: 'Signup successful, user is logged in',
+        data: {
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            fullName: newUser.fullName,
+            phone: newUser.phone,
+            photo: newUser.photo,
+            role: 'provider'
+          }
+        }
+      });
+    });
   } catch (error) {
     logger.error(error);
     res.status(500).send("An error occurred while creating the provider");
