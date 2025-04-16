@@ -96,47 +96,69 @@ const createUser = async (role: 'client' | 'provider', data: any) => {
   }
 };
 
-router.post('/', catchAsync(async (req: Request, res: Response) => {
-  // Validate request body
-  validateRequest(req, clientSignupRules);
+router.post('/', async (req: any, res: any) => {
+  try {
+    // Validate request body
+    validateRequest(req, clientSignupRules);
 
-  const { email, password, fullName, phone, photo } = req.body;
+    const { email, password, fullName, phone, photo } = req.body;
 
-  // Check for existing user
-  const existingUser = await prisma.client.findFirst({
-    where: {
-      OR: [{ email }, { phone }],
-    },
-  });
+    // Check for existing user
+    const existingUser = await prisma.client.findFirst({
+      where: {
+        OR: [{ email }, { phone }],
+      },
+    });
 
-  if (existingUser) {
-    throw new ValidationError('Client with this email or phone already exists');
-  }
-
-  // Hash password and create user
-  const hashedPassword = await hashPassword(password);
-  const newUser = await createUser('client', {
-    email,
-    password: hashedPassword,
-    fullName,
-    phone,
-    photo: photo || null
-  });
-
-  logger.info('New client created:', { email });
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        fullName: newUser.fullName,
-        phone: newUser.phone,
-        photo: newUser.photo
-      }
+    if (existingUser) {
+      logger.error('Client with this email or phone already exists');
+      return res.status(400).send('Client with this email or phone already exists');
     }
-  });
-}));
+
+    // Hash password and create user
+    const hashedPassword = await hashPassword(password);
+    const newUser = await createUser('client', {
+      email,
+      password: hashedPassword,
+      fullName,
+      phone,
+      photo: photo || null
+    });
+
+    logger.info(`New client created: ${email}`);
+
+    // Add role to the user object before login
+    const userWithRole = { ...newUser, role: 'client' };
+    
+    req.login(userWithRole, (err: any) => {
+      if (err) {
+        logger.error('Error logging in after signup:', err);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Failed to login after signup',
+          error: err.message
+        });
+      }
+
+      res.status(201).json({
+        status: 'success',
+        message: 'Signup successful, user is logged in',
+        data: {
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            fullName: newUser.fullName,
+            phone: newUser.phone,
+            photo: newUser.photo,
+            role: 'client'
+          }
+        }
+      });
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send('An error occurred while creating the client');
+  }
+});
 
 export default router;
