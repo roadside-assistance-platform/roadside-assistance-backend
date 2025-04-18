@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon app.ts",
     "build": "tsc",
-    "serve": "node dist/index.js"
+    "serve": "node dist/index.js",
+    "postinstall": "prisma generate"
   },
   "repository": {
     "type": "git",
