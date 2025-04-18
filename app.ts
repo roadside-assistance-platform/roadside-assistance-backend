@@ -8,7 +8,7 @@ import logger from "./utilities/logger";
 import passport from "./utilities/passport";
 import loginProvider from "./routes/provider/login";
 import loginClient from "./routes/client/login";
-
+import verifyEmail from "./routes/verifyEmail";
 import clientGoogleAuth from "./routes/client/googleAuth";
 import providerGoogleAuth from "./routes/provider/googleAuth";
 import createClient from "./routes/client/signup";
@@ -286,6 +286,9 @@ app.use("/service/update", isAuthenticated, updateService);
 
 //home
 app.use("/home",isAuthenticated, home);
+
+//verifyEmail
+app.use("/email", verifyEmail)
 
 // 404 handler for undefined routes
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

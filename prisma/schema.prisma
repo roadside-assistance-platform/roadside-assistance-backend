@@ -11,11 +11,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")  // 👈 Add this
 }
+// prisma/schema.prisma
+model EmailVerification {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  code      String
+  createdAt DateTime @default(now())
+}
+
 
 
 model Provider {
