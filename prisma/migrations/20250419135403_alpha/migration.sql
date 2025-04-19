@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "serviceCategory" AS ENUM ('mechanic', 'electrician', 'towing', 'fuel', 'idontknow');
+CREATE TYPE "serviceCategory" AS ENUM ('TOWING', 'FLAT_TIRE', 'FUEL_DELIVERY', 'LOCKOUT', 'EMERGENCY', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "EmailVerification" (

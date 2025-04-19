@@ -106,9 +106,10 @@ model Field {
   providers Provider[]
 }
 enum serviceCategory {
-  mechanic
-  electrician
-  towing
-  fuel
-  idontknow
+  TOWING
+  FLAT_TIRE
+  FUEL_DELIVERY
+  LOCKOUT
+  EMERGENCY
+  OTHER
 }
