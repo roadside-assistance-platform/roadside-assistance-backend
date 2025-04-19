@@ -21,6 +21,8 @@ import home from "./routes/home/home";
 import verifygoogleToken from "./routes/google";
 import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 import { NotFoundError } from './errors/notFound.error';
+import clients from "./routes/client/clients";
+import providers from "./routes/provider/providers";
 
 import { sendMail } from "./utilities/mailsender"
 
@@ -270,14 +272,16 @@ app.use("/google/verify", verifygoogleToken);
 //client
 app.use("/client/login", loginClient);
 app.use("/client/signup", createClient);
-app.use("/client/update",isClient,updateClient)
+app.use("/client/update",isAuthenticated,updateClient)
+app.use("/client/clients",isAuthenticated,clients)
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
 
 //provider
 app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
-app.use("/provider/update",isProvider,updateProvider)
+app.use("/provider/update",isAuthenticated,updateProvider)
+app.use("/provider/providers",isAuthenticated,providers)
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 //service
