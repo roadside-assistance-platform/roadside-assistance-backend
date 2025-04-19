@@ -15,6 +15,7 @@
  *             required:
  *               - price
  *               - serviceLocation
+ *               - serviceCategory
  *             properties:
  *               providerId:
  *                 type: string
@@ -26,6 +27,13 @@
  *               serviceLocation:
  *                 type: string
  *                 description: Location where the service is needed.
+ *               serviceCategory:
+ *                 type: string
+ *                 description: Category of the service.
+ *               description:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Additional details about the service.
  *     responses:
  *       201:
  *         description: Service successfully created.
@@ -50,6 +58,13 @@
  *                 serviceLocation:
  *                   type: string
  *                   description: Service location.
+ *                 serviceCategory:
+ *                   type: string
+ *                   description: Category of the service.
+ *                 description:
+ *                   type: string
+ *                   nullable: true
+ *                   description: Additional details about the service.
  *       400:
  *         description: Bad request, required fields are missing.
  *       404:
@@ -65,7 +80,7 @@ import logger from "../../utilities/logger";
 const router = Router();
 
 router.post("/", async (req: any, res: any) => {
-  const { providerId, price, serviceLocation } = req.body;
+  const { providerId, price, serviceLocation, serviceCategory, description } = req.body;
   const clientId = req.user.id; // Assuming client authentication middleware attaches user to req
 
   // Validate required fields (providerId is optional)
@@ -73,7 +88,10 @@ router.post("/", async (req: any, res: any) => {
     logger.error("serviceLocation is required: serviceLocation");
     return res.status(400).send("serviceLocation is required: serviceLocation");
   }
-
+  if (!serviceCategory) {
+    logger.error("serviceCategory is required: serviceCategory");
+    return res.status(400).send("serviceCategory is required: serviceCategory");
+  }
   if (!('price' in req.body)) {
     logger.error("Price field is required in request");
     return res.status(400).send("Price field is required in request");
@@ -97,7 +115,9 @@ router.post("/", async (req: any, res: any) => {
         clientId,
         providerId: providerId || null,
         price: price || 0,
-        serviceLocation,
+        serviceLocation: serviceLocation,
+        serviceCategory: serviceCategory,
+        description: description || null,
       },
     });
     logger.info(`New service created with id: ${newService.id}`);

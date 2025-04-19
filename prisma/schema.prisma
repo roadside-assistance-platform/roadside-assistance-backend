@@ -63,6 +63,8 @@ model Service {
   id              String  @id @default(uuid())
   clientId        String
   providerId      String?
+  description    String?
+  serviceCategory serviceCategory
   price           Int
   serviceRating   Int?
   serviceLocation String
@@ -100,6 +102,13 @@ model Admin {
 
 model Field {
   id    String  @id @default(uuid())
-  name  String  @unique
+  name  serviceCategory  @unique
   providers Provider[]
+}
+enum serviceCategory {
+  mechanic
+  electrician
+  towing
+  fuel
+  idontknow
 }

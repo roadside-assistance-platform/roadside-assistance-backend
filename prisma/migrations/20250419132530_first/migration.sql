@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "serviceCategory" AS ENUM ('mechanic', 'electrician', 'towing', 'fuel', 'idontknow');
+
 -- CreateTable
 CREATE TABLE "EmailVerification" (
     "id" TEXT NOT NULL,
@@ -44,6 +47,8 @@ CREATE TABLE "Service" (
     "id" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
     "providerId" TEXT,
+    "description" TEXT,
+    "serviceCategory" "serviceCategory" NOT NULL,
     "price" INTEGER NOT NULL,
     "serviceRating" INTEGER,
     "serviceLocation" TEXT NOT NULL,
@@ -81,7 +86,7 @@ CREATE TABLE "Admin" (
 -- CreateTable
 CREATE TABLE "Field" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "name" "serviceCategory" NOT NULL,
 
     CONSTRAINT "Field_pkey" PRIMARY KEY ("id")
 );
