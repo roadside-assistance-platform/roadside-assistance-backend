@@ -116,6 +116,8 @@ router.put("/:id", validateRequest(providerUpdateRules), catchAsync(async (req: 
       data: updateData
     });
 
+
+
     logger.info(`Provider updated successfully`);
     res.status(200).json(updatedUser);
   } catch (error) {

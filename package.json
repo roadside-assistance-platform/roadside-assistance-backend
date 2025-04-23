@@ -38,7 +38,8 @@
     "@prisma/client": "^6.5.0",
     "@types/amqplib": "^0.10.7",
     "@types/bcrypt": "^5.0.2",
-    "amqplib": "^0.10.5",
+    "@types/ws": "^8.18.1",
+    "amqplib": "^0.10.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
@@ -52,6 +53,7 @@
     "prisma": "^6.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "ws": "^8.18.1"
   }
 }

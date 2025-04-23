@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /send-code:
+ * /email/send-code:
  *   post:
  *     summary: Send a verification code to the user's email
  *     tags: [EmailVerification]
@@ -58,7 +58,7 @@
 
 /**
  * @swagger
- * /verify-code:
+ * /email/verify-code:
  *   post:
  *     summary: Verify the code sent to the user's email
  *     tags: [EmailVerification]
