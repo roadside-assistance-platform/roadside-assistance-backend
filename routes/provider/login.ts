@@ -33,11 +33,17 @@
  *             schema:
  *               type: object
  *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
  *                 message:
  *                   type: string
  *                   example: Login successful
- *                 Provider:
- *                   $ref: '#/components/schemas/Provider'
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/Provider'
  *       401:
  *         description: Authentication failed
  *         content:
@@ -45,6 +51,9 @@
  *             schema:
  *               type: object
  *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
  *                 message:
  *                   type: string
  *                   example: Authentication failed
@@ -58,6 +67,9 @@
  *             schema:
  *               type: object
  *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
  *                 message:
  *                   type: string
  *                   example: An unexpected error occurred
@@ -102,7 +114,13 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
           status: 'success',
           message: 'Login successful',
           data: {
-            provider
+            user: {
+              id: provider.id,
+              email: provider.email,
+              fullName: provider.fullName,
+              phone: provider.phone,
+              photo: provider.photo
+            }
           }
         }));
       });

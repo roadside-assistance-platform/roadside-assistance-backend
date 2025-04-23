@@ -23,7 +23,7 @@
  *                 description: Optional provider ID for the service.
  *               price:
  *                 type: number
- *                 description: Price of the service.
+ *                 description: Price of the service in cents.
  *               serviceLocation:
  *                 type: string
  *                 description: Location where the service is needed.
@@ -54,7 +54,7 @@
  *                   description: ID of the provider assigned to the service (if provided).
  *                 price:
  *                   type: number
- *                   description: Price of the service.
+ *                   description: Price of the service in cents.
  *                 serviceLocation:
  *                   type: string
  *                   description: Service location.
@@ -76,8 +76,10 @@
 import { Router } from "express";
 import prisma from "../../app";
 import logger from "../../utilities/logger";
+import { NotificationService } from "../../services/notification.service";
 
 const router = Router();
+const notificationService = new NotificationService();
 
 router.post("/", async (req: any, res: any) => {
   const { providerId, price, serviceLocation, serviceCategory, description } = req.body;
@@ -121,9 +123,11 @@ router.post("/", async (req: any, res: any) => {
       },
     });
     logger.info(`New service created with id: ${newService.id}`);
+    // Notify relevant providers for this category with full service info
+    await notificationService.sendProviderNotification(newService.id, newService);
     return res.status(201).json(newService);
   } catch (error) {
-    logger.error("error");
+    logger.error("Error occurred while creating the service", { error });
     return res.status(500).send("An error occurred while creating the service");
   }
 });
