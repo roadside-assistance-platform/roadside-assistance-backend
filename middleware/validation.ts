@@ -25,7 +25,7 @@ export const validateRequest = (rules: ValidationRules) => {
       }
 
       // Required field check
-      if (!rule.optional && (value === undefined || value === null)) {
+      if (!rule.optional && !(field in req.body)) {
         validationErrors.push(`${field} is required`);
         continue;
       }
