@@ -46,7 +46,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Authentication failed
+ *                   example: "string"
  *                 info:
  *                   type: object
  *                   description: Additional information about the failure.
@@ -60,7 +60,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Internal server error
+ *                   example: "string"
  */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";

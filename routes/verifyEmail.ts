@@ -108,7 +108,7 @@
  *               properties:
  *                 error:
  *                   type: string
- *                   example: No verification record found
+ *                   example: "string"
  */
 // routes/emailVerification.ts
 import prisma from '../app';

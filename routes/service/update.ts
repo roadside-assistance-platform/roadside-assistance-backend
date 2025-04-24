@@ -62,7 +62,29 @@
  *                   type: object
  *                   properties:
  *                     service:
- *                       $ref: '#/components/schemas/Service'
+ *                       type: object
+ *                       example:
+ *                         id: "string"
+ *                         clientId: "string"
+ *                         providerId: "string"
+ *                         description: "string"
+ *                         serviceCategory: "TOWING"
+ *                         price: 21
+ *                         serviceRating: null
+ *                         serviceLocation: "string"
+ *                         done: true
+ *                         createdAt: "2025-04-24T21:35:32.284Z"
+ *                         updatedAt: "2025-04-24T21:36:42.285Z"
+ *                         client:
+ *                           id: "string"
+ *                           fullName: "Jane Smith"
+ *                           email: "client@example.com"
+ *                           phone: "1234567890"
+ *                         provider:
+ *                           id: "string"
+ *                           fullName: "Provider Name"
+ *                           email: "provider@example.com"
+ *                           phone: "+1234567890"
  *       400:
  *         description: Bad request due to validation error
  *         content:

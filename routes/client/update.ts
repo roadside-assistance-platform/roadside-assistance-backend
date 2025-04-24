@@ -56,14 +56,14 @@
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Client not found"
+ *               example: "string"
  *       500:
  *         description: Internal server error
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "An error occurred while updating the client"
+ *               example: "string"
  */
 
 import prisma from "../../app";
