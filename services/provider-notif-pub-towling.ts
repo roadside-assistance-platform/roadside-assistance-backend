@@ -3,25 +3,20 @@ dotenv.config();
 import amqp from 'amqplib';
 
 async function sendTestNotification() {
-  const category = process.argv[2] || process.env.NOTIFICATION_CATEGORY || 'towling';
-  const providerId = process.argv[3] || 'test-provider';
-  const message = process.argv[4] || 'Test notification';
-  const exchangeName = `${category.toLowerCase()}-notifications-exchange`;
-
   const connection = await amqp.connect(process.env.RABBITMQ_URL!);
   const channel = await connection.createChannel();
+  const exchangeName = 'towling-notifications-exchange';
   await channel.assertExchange(exchangeName, 'fanout', { durable: false });
 
   const notification = {
-    providerId,
-    data: { message }
+    providerId: 'test-provider',
+    data: { message: 'Test notification' }
   };
 
   channel.publish(exchangeName, '', Buffer.from(JSON.stringify(notification)));
-  console.log(`Test notification sent to ${exchangeName} for providerId=${providerId}:`, message);
+  console.log('Test notification sent!');
   await channel.close();
   await connection.close();
 }
 
-// Usage: node provider-notification-publisher.js [category] [providerId] [message]
 sendTestNotification().catch(console.error);
