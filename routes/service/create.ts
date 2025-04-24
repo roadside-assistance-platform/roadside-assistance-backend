@@ -81,33 +81,37 @@ import { NotificationService } from "../../services/notification.service";
 const router = Router();
 const notificationService = new NotificationService();
 
-router.post("/", async (req: any, res: any) => {
-  const { providerId, price, serviceLocation, serviceCategory, description } = req.body;
-  const clientId = req.user.id; // Assuming client authentication middleware attaches user to req
+import { ValidationError } from '../../utilities/errors';
 
-  // Validate required fields (providerId is optional)
-  if (!serviceLocation) {
-    logger.error("serviceLocation is required: serviceLocation");
-    return res.status(400).send("serviceLocation is required: serviceLocation");
-  }
-  if (!serviceCategory) {
-    logger.error("serviceCategory is required: serviceCategory");
-    return res.status(400).send("serviceCategory is required: serviceCategory");
-  }
-  if (!('price' in req.body)) {
-    logger.error("Price field is required in request");
-    return res.status(400).send("Price field is required in request");
-  }
-
+router.post("/", async (req: any, res: any, next: any) => {
   try {
+    // Validate request body using your validation system
+    const { providerId, price, serviceLocation, serviceCategory, description } = req.body;
+    const clientId = req.user.id; // Assuming client authentication middleware attaches user to req
+
+    // Comprehensive validation
+    const errors: string[] = [];
+    if (!serviceLocation || typeof serviceLocation !== 'string' || serviceLocation.length < 3)
+      errors.push('serviceLocation is required and must be a string of at least 3 characters.');
+    if (!serviceCategory || typeof serviceCategory !== 'string' || serviceCategory.length < 3)
+      errors.push('serviceCategory is required and must be a string of at least 3 characters.');
+    if (price === undefined || typeof price !== 'number' || price < 0)
+      errors.push('price is required and must be a non-negative number.');
+    if (description && (typeof description !== 'string' || description.length > 500))
+      errors.push('description must be a string of max 500 characters.');
+    if (providerId && typeof providerId !== 'string')
+      errors.push('providerId must be a string if provided.');
+    if (errors.length > 0) {
+      logger.error('Validation errors on service creation', { errors });
+      return next(new ValidationError(errors.join(' ')));
+    }
+
     // If providerId is provided, verify that the provider exists
     if (providerId) {
-      const provider = await prisma.provider.findUnique({
-        where: { id: providerId },
-      });
+      const provider = await prisma.provider.findUnique({ where: { id: providerId } });
       if (!provider) {
         logger.error(`Provider with id ${providerId} not found`);
-        return res.status(404).send("Provider not found");
+        return next(new ValidationError('Provider not found'));
       }
     }
 
@@ -116,19 +120,19 @@ router.post("/", async (req: any, res: any) => {
       data: {
         clientId,
         providerId: providerId || null,
-        price: price || 0,
-        serviceLocation: serviceLocation,
-        serviceCategory: serviceCategory,
+        price,
+        serviceLocation,
+        serviceCategory,
         description: description || null,
       },
     });
     logger.info(`New service created with id: ${newService.id}`);
     // Notify relevant providers for this category with full service info
-    await notificationService.sendProviderNotification(newService.id, newService);
+    await notificationService.notifyProvidersOfNewService(newService);
     return res.status(201).json(newService);
   } catch (error) {
     logger.error("Error occurred while creating the service", { error });
-    return res.status(500).send("An error occurred while creating the service");
+    next(error);
   }
 });
 
