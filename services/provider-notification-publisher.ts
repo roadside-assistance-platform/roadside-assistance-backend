@@ -6,19 +6,42 @@ async function sendTestNotification() {
   const category = process.argv[2] || process.env.NOTIFICATION_CATEGORY || 'towling';
   const providerId = process.argv[3] || 'test-provider';
   const message = process.argv[4] || 'Test notification';
-  const exchangeName = `${category.toLowerCase()}-notifications-exchange`;
+
+  const allCategories = [
+    'towing',
+    'flat_tire',
+    'fuel_delivery',
+    'lockout',
+    'emergency',
+    'other',
+  ];
 
   const connection = await amqp.connect(process.env.RABBITMQ_URL!);
   const channel = await connection.createChannel();
-  await channel.assertExchange(exchangeName, 'fanout', { durable: false });
 
-  const notification = {
-    providerId,
-    data: { message }
-  };
-
-  channel.publish(exchangeName, '', Buffer.from(JSON.stringify(notification)));
-  console.log(`Test notification sent to ${exchangeName} for providerId=${providerId}:`, message);
+  let publishedTo: string[] = [];
+  if (category.toLowerCase() === 'other') {
+    for (const cat of allCategories) {
+      const exchangeName = `${cat}-notifications-exchange`;
+      await channel.assertExchange(exchangeName, 'fanout', { durable: false });
+      const notification = {
+        providerId,
+        data: { message }
+      };
+      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(notification)));
+      publishedTo.push(exchangeName);
+    }
+    console.log(`Test notification sent to ALL categories (${publishedTo.join(', ')}) for providerId=${providerId}:`, message);
+  } else {
+    const exchangeName = `${category.toLowerCase()}-notifications-exchange`;
+    await channel.assertExchange(exchangeName, 'fanout', { durable: false });
+    const notification = {
+      providerId,
+      data: { message }
+    };
+    channel.publish(exchangeName, '', Buffer.from(JSON.stringify(notification)));
+    console.log(`Test notification sent to ${exchangeName} for providerId=${providerId}:`, message);
+  }
   await channel.close();
   await connection.close();
 }
