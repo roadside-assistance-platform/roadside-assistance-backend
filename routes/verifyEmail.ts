@@ -121,7 +121,7 @@ const router = Router();
 router.post('/send-code', async (req: any, res: any) => {
   const { email } = req.body as { email: string };
 
-  if (!email) return res.status(400).json({ error: 'Email is required' });
+  if (!('email' in req.body)) return res.status(400).json({ error: 'Email is required' });
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -150,7 +150,7 @@ router.post('/send-code', async (req: any, res: any) => {
 router.post('/verify-code', async (req: any, res: any) => {
   const { email, code } = req.body as { email: string; code: string };
 
-  if (!email || !code)
+  if (!('email' in req.body) || !('code' in req.body))
     return res.status(400).json({ error: 'Email and code are required' });
 
   const record = await prisma.emailVerification.findUnique({ where: { email } });

@@ -87,7 +87,7 @@ import { catchAsync } from "../../utilities/catchAsync";
 const router = Router();
 
 router.post("/", catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.body.email || !req.body.password) {
+  if (!('email' in req.body) || !('password' in req.body)) {
     throw new AppError('Please provide email and password', 400);
   }
 

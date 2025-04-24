@@ -83,7 +83,7 @@ const createUser = async (role: string, data: any) => {
 
 router.post("/", async (req: any, res: any) => {
   const { email, password, fullName, phone, photo } = req.body;
-  if (!email || !password || !fullName || !phone || !photo) {
+  if (!('email' in req.body) || !('password' in req.body) || !('fullName' in req.body) || !('phone' in req.body) || !('photo' in req.body)) {
     logger.error("All fields are required: email, password, fullName, phone, photo");
     return res.status(400).send("All fields are required: email, password, fullName, phone, photo");
   }
