@@ -156,7 +156,7 @@ const serviceUpdateRules = {
   providerId: { type: 'string', optional: true },
   price: { type: 'number', min: 0, optional: true },
   serviceRating: { type: 'number', min: 1, max: 5, optional: true },
-  serviceLocation: { type: 'string', optional: true },
+  serviceLocation: { type: 'string', optional: true }, // Optional for update
   done: { type: 'boolean', optional: true }
 };
 
