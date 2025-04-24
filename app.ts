@@ -23,6 +23,10 @@ import { isAuthenticated,isClient,isProvider } from "./middleware/auth";
 import { NotFoundError } from './errors/notFound.error';
 import clients from "./routes/client/clients";
 import providers from "./routes/provider/providers";
+import serviceInfo from "./routes/service/info";
+import clientInfo from "./routes/client/info";
+import providerInfo from "./routes/provider/info";
+
 
 import { sendMail } from "./utilities/mailsender"
 
@@ -274,6 +278,7 @@ app.use("/client/login", loginClient);
 app.use("/client/signup", createClient);
 app.use("/client/update",isAuthenticated,updateClient)
 app.use("/client/clients",isAuthenticated,clients)
+app.use("/client/info",isAuthenticated,clientInfo)
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
 
@@ -282,11 +287,13 @@ app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
 app.use("/provider/update",isAuthenticated,updateProvider)
 app.use("/provider/providers",isAuthenticated,providers)
+app.use("/provider/info",isAuthenticated,providerInfo)
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 //service
 app.use("/service/create", isClient, createService);
 app.use("/service/update", isAuthenticated, updateService);
+app.use("/service/info",isAuthenticated,serviceInfo)
 
 //home
 app.use("/home",isAuthenticated, home);
