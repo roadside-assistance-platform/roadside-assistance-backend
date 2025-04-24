@@ -22,6 +22,7 @@ CREATE TABLE "Provider" (
     "fieldId" TEXT,
     "location" TEXT,
     "rating" INTEGER DEFAULT 0,
+    "serviceCategory" "serviceCategory",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

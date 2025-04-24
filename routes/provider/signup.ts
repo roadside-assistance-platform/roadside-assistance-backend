@@ -42,6 +42,10 @@ const createUser = async (role: string, data: any) => {
 *           type: string
 *           format: uri
 *           example: "http://example.com/photo.jpg"
+*         serviceCategory:
+*           type: string
+*           enum: ["TOWING", "BATTERY", "FUEL", "LOCKOUT", "TIRE"]
+*           example: "TOWING"
 */
 
 /**
@@ -82,10 +86,17 @@ const createUser = async (role: string, data: any) => {
 
 
 router.post("/", async (req: any, res: any) => {
-  const { email, password, fullName, phone, photo } = req.body;
-  if (!('email' in req.body) || !('password' in req.body) || !('fullName' in req.body) || !('phone' in req.body) || !('photo' in req.body)) {
-    logger.error("All fields are required: email, password, fullName, phone, photo");
-    return res.status(400).send("All fields are required: email, password, fullName, phone, photo");
+  const { email, password, fullName, phone, photo,serviceCategory } = req.body;
+  if (!('email' in req.body) || !('password' in req.body) || !('serviceCategory' in req.body) || !('fullName' in req.body) || !('phone' in req.body) || !('photo' in req.body)) {
+    logger.error("All fields are required: email, password, serviceCategory, fullName, phone, photo");
+    return res.status(400).send("All fields are required: email, password, serviceCategory, fullName, phone, photo");
+  }
+
+  // Validate serviceCategory
+  const allowedCategories = ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"];
+  if (!allowedCategories.includes(serviceCategory)) {
+    logger.error(`Invalid serviceCategory: ${serviceCategory}`);
+    return res.status(400).send(`Invalid serviceCategory. Allowed values: ${allowedCategories.join(", ")}`);
   }
 
   try {
@@ -100,11 +111,11 @@ router.post("/", async (req: any, res: any) => {
     }
 
     const hashedPassword = await hashPassword(password);
-    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo });
+    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategory });
     logger.info(`New provider created: ${email}`);
     
-    // Add role to the user object before login
-    const userWithRole = { ...newUser, role: 'provider' };
+    // Ensure serviceCategory is present on user object for response
+    const userWithRole = { ...newUser, role: 'provider', serviceCategory: serviceCategory };
     
     req.login(userWithRole, (err: any) => {
       if (err) {
@@ -126,6 +137,7 @@ router.post("/", async (req: any, res: any) => {
             fullName: newUser.fullName,
             phone: newUser.phone,
             photo: newUser.photo,
+            serviceCategory: userWithRole.serviceCategory,
             role: 'provider'
           }
         }
