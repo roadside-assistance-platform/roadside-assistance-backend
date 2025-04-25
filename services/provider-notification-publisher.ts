@@ -8,12 +8,12 @@ async function sendTestNotification() {
   const message = process.argv[4] || 'Test notification';
 
   const allCategories = [
-    'towing',
-    'flat_tire',
-    'fuel_delivery',
-    'lockout',
-    'emergency',
-    'other',
+    'TOWING',
+    'FLAT_TIRE',
+    'FUEL_DELIVERY',
+    'LOCKOUT',
+    'EMERGENCY',
+    'OTHER',
   ];
 
   const connection = await amqp.connect(process.env.RABBITMQ_URL!);

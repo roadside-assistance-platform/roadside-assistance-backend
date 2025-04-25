@@ -5,7 +5,7 @@ import amqp from 'amqplib';
 async function sendTestNotification() {
   const connection = await amqp.connect(process.env.RABBITMQ_URL!);
   const channel = await connection.createChannel();
-  const exchangeName = 'towling-notifications-exchange';
+  const exchangeName = 'TOWING-notifications-exchange';
   await channel.assertExchange(exchangeName, 'fanout', { durable: false });
 
   const notification = {
