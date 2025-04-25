@@ -37,9 +37,11 @@
  *                 format: uri
  *                 example: "http://example.com/newphoto.jpg"
  *               serviceCategories:
- *                 type: string
- *                 enum: ["TOWING", "BATTERY", "FUEL", "LOCKOUT", "TIRE"]
- *                 example: "TOWING"
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"]
+ *                 example: ["TOWING", "FUEL_DELIVERY"]
  *     responses:
  *       200:
  *         description: Provider updated successfully
@@ -74,7 +76,6 @@ import { Router, Request, Response, NextFunction } from "express";
 import prisma from "../../app";
 import { hashPassword } from "../../utilities/bcrypt";
 import logger from "../../utilities/logger";
-import { isProvider } from "../../middleware/auth";
 import { validateRequest } from "../../middleware/validation";
 
 const router = Router();
@@ -86,7 +87,7 @@ const providerUpdateRules = {
   fullName: { type: 'string', min: 2, optional: true },
   phone: { type: 'string', pattern: /^\+?[1-9]\d{1,14}$/, optional: true },
   photo: { type: 'string', format: 'uri', optional: true },
-  serviceCategories: { type: 'string', optional: true, enum: ['TOWING','BATTERY','FUEL','LOCKOUT','TIRE'] }
+  serviceCategories: { type: 'array', items: { type: 'string', enum: ['TOWING', 'FLAT_TIRE', 'FUEL_DELIVERY', 'LOCKOUT', 'EMERGENCY', 'OTHER'] }, optional: true }
 };
 
 import { catchAsync } from '../../utilities/catchAsync';
@@ -120,8 +121,6 @@ router.put("/:id", validateRequest(providerUpdateRules), catchAsync(async (req: 
       where: { id },
       data: updateData
     });
-
-
 
     logger.info(`Provider updated successfully`);
     res.status(200).json(updatedUser);

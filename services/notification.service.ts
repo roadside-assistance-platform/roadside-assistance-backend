@@ -39,7 +39,7 @@ export class NotificationService {
   // Main method to notify providers of a new service
   async notifyProvidersOfNewService(service: any) {
     await this.init();
-    const isOther = service.serviceCategory.toLowerCase() === 'other';
+    const isOther = (service.serviceCategories && service.serviceCategories[0]).toLowerCase() === 'other';
     if (isOther) {
       // Send to all category queues for all providers
       const allProviders = await prisma.provider.findMany();
@@ -55,12 +55,12 @@ export class NotificationService {
       const relevantProviders = await prisma.provider.findMany({
         where: {
           field: {
-            name: service.serviceCategory
+            name: (service.serviceCategories && service.serviceCategories[0])
           }
         }
       });
       for (const provider of relevantProviders) {
-        await this.sendCategoryNotification(service.serviceCategory, provider.id, {
+        await this.sendCategoryNotification((service.serviceCategories && service.serviceCategories[0]), provider.id, {
           ...service,
           type: 'NEW_SERVICE_REQUEST',
           timestamp: new Date()
