@@ -76,7 +76,7 @@ router.get("/:id", isAuthenticated, async (req: any, res: any, next: NextFunctio
         clientId: true,
         providerId: true,
         description: true,
-        serviceCategory: true,
+        serviceCategories: true,
         price: true,
         serviceRating: true,
         serviceLocation: true,

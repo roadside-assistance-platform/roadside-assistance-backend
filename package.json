@@ -34,9 +34,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
-  "prisma": {
-    "seed": "ts-node ./prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "@types/amqplib": "^0.10.7",

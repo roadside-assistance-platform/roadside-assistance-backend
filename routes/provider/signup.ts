@@ -42,10 +42,12 @@ const createUser = async (role: string, data: any) => {
  *           type: string
  *           format: uri
  *           example: "http://example.com/photo.jpg"
- *         serviceCategory:
- *           type: string
- *           enum: ["TOWING", "BATTERY", "FUEL", "LOCKOUT", "TIRE"]
- *           example: "TOWING"
+ *         serviceCategories:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"]
+ *           example: ["TOWING", "FUEL_DELIVERY"]
  */
 
 /**
@@ -85,17 +87,17 @@ const createUser = async (role: string, data: any) => {
  */
 
 router.post("/", async (req: any, res: any) => {
-  const { email, password, fullName, phone, photo, serviceCategory } = req.body;
-  if (!('email' in req.body) || !('password' in req.body) || !('serviceCategory' in req.body) || !('fullName' in req.body) || !('phone' in req.body) || !('photo' in req.body)) {
-    logger.error("All fields are required: email, password, serviceCategory, fullName, phone, photo");
-    return res.status(400).send("All fields are required: email, password, serviceCategory, fullName, phone, photo");
+  const { email, password, fullName, phone, photo, serviceCategories } = req.body;
+  if (!('email' in req.body) || !('password' in req.body) || !('serviceCategories' in req.body) || !('fullName' in req.body) || !('phone' in req.body) || !('photo' in req.body)) {
+    logger.error("All fields are required: email, password, serviceCategories, fullName, phone, photo");
+    return res.status(400).send("All fields are required: email, password, serviceCategories, fullName, phone, photo");
   }
 
-  // Validate serviceCategory
+  // Validate serviceCategories as array
   const allowedCategories = ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"];
-  if (!allowedCategories.includes(serviceCategory)) {
-    logger.error(`Invalid serviceCategory: ${serviceCategory}`);
-    return res.status(400).send(`Invalid serviceCategory. Allowed values: ${allowedCategories.join(", ")}`);
+  if (!Array.isArray(serviceCategories) || serviceCategories.length === 0 || !serviceCategories.every((cat: string) => allowedCategories.includes(cat))) {
+    logger.error(`Invalid serviceCategories: ${JSON.stringify(serviceCategories)}`);
+    return res.status(400).send(`Invalid serviceCategories. Allowed values (array): ${allowedCategories.join(", ")}`);
   }
 
   try {
@@ -109,18 +111,18 @@ router.post("/", async (req: any, res: any) => {
       return res.status(400).send("Provider with this email or phone already exists");
     }
 
-    // Find the Field by serviceCategory
-    const field = await prisma.field.findUnique({ where: { name: serviceCategory } });
+    // Find the Field by the first serviceCategories (for fieldId)
+    const field = await prisma.field.findUnique({ where: { name: serviceCategories[0] } });
     if (!field) {
-      logger.error(`Field for serviceCategory ${serviceCategory} not found`);
+      logger.error(`Field for serviceCategories ${serviceCategories[0]} not found`);
       return res.status(400).send("Invalid service category.");
     }
     const hashedPassword = await hashPassword(password);
-    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategory, fieldId: field.id });
+    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategories, fieldId: field.id });
     logger.info(`New provider created: ${email}`);
     
-    // Ensure serviceCategory is present on user object for response
-    const userWithRole = { ...newUser, role: 'provider', serviceCategory: serviceCategory };
+    // Ensure serviceCategories is present on user object for response
+    const userWithRole = { ...newUser, role: 'provider', serviceCategories };
     
     req.login(userWithRole, (err: any) => {
       if (err) {
@@ -142,7 +144,7 @@ router.post("/", async (req: any, res: any) => {
             fullName: newUser.fullName,
             phone: newUser.phone,
             photo: newUser.photo,
-            serviceCategory: userWithRole.serviceCategory,
+            serviceCategories: userWithRole.serviceCategories,
             role: 'provider'
           }
         }

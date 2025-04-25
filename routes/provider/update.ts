@@ -36,7 +36,7 @@
  *                 type: string
  *                 format: uri
  *                 example: "http://example.com/newphoto.jpg"
- *               serviceCategory:
+ *               serviceCategories:
  *                 type: string
  *                 enum: ["TOWING", "BATTERY", "FUEL", "LOCKOUT", "TIRE"]
  *                 example: "TOWING"
@@ -86,7 +86,7 @@ const providerUpdateRules = {
   fullName: { type: 'string', min: 2, optional: true },
   phone: { type: 'string', pattern: /^\+?[1-9]\d{1,14}$/, optional: true },
   photo: { type: 'string', format: 'uri', optional: true },
-  serviceCategory: { type: 'string', optional: true, enum: ['TOWING','BATTERY','FUEL','LOCKOUT','TIRE'] }
+  serviceCategories: { type: 'string', optional: true, enum: ['TOWING','BATTERY','FUEL','LOCKOUT','TIRE'] }
 };
 
 import { catchAsync } from '../../utilities/catchAsync';
