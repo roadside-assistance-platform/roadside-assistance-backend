@@ -28,6 +28,11 @@ async function main() {
     const field = await prisma.field.findUnique({ where: { name: category } });
     if (!field) continue;
     const hashedPassword = await bcrypt.hash('Provider123!', 10);
+    // Assign two categories per provider for demonstration
+    const categoriesForProvider = [category];
+    if (serviceCategories.indexOf(category) < serviceCategories.length - 1) {
+      categoriesForProvider.push(serviceCategories[serviceCategories.indexOf(category) + 1]);
+    }
     await prisma.provider.upsert({
       where: { email: `provider_${category.toLowerCase()}@example.com` },
       update: {},
@@ -37,7 +42,7 @@ async function main() {
         fullName: `Provider ${category.replace('_', ' ')}`,
         phone: `+123456789${serviceCategories.indexOf(category).toString().padStart(2, '0')}`,
         photo: 'https://example.com/photo.jpg',
-        serviceCategory: category,
+        serviceCategories: categoriesForProvider,
         fieldId: field.id
       }
     });

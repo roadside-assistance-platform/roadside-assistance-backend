@@ -39,7 +39,7 @@ model Provider {
   fieldId   String?
   location  String?
   rating    Int?     @default(0)
-  serviceCategory serviceCategory? // <-- Now optional
+  serviceCategories serviceCategory[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -67,7 +67,7 @@ model Service {
   clientId        String
   providerId      String?
   description    String?
-  serviceCategory serviceCategory
+  serviceCategories serviceCategory[]
   price           Int
   serviceRating   Int?
   serviceLocation String

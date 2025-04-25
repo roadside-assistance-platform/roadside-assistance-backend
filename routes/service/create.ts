@@ -15,7 +15,7 @@
  *             required:
  *               - price
  *               - serviceLocation
- *               - serviceCategory
+ *               - serviceCategories
  *             properties:
  *               providerId:
  *                 type: string
@@ -27,7 +27,7 @@
  *               serviceLocation:
  *                 type: string
  *                 description: Location where the service is needed.
- *               serviceCategory:
+ *               serviceCategories:
  *                 type: string
  *                 description: Category of the service.
  *               description:
@@ -58,7 +58,7 @@
  *                 serviceLocation:
  *                   type: string
  *                   description: Service location.
- *                 serviceCategory:
+ *                 serviceCategories:
  *                   type: string
  *                   description: Category of the service.
  *                 description:
@@ -84,17 +84,18 @@ const notificationService = new NotificationService();
 import { ValidationError } from '../../utilities/errors';
 
 router.post("/", async (req: any, res: any, next: any) => {
+  const allowedCategories = ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"];
   try {
     // Validate request body using your validation system
-    const { providerId, price, serviceLocation, serviceCategory, description } = req.body;
+    const { providerId, price, serviceLocation, serviceCategories, description } = req.body;
     const clientId = req.user.id; // Assuming client authentication middleware attaches user to req
 
     // Comprehensive validation
     const errors: string[] = [];
     if (!serviceLocation || typeof serviceLocation !== 'string' || serviceLocation.length < 3)
       errors.push('serviceLocation is required and must be a string of at least 3 characters.');
-    if (!serviceCategory || typeof serviceCategory !== 'string' || serviceCategory.length < 3)
-      errors.push('serviceCategory is required and must be a string of at least 3 characters.');
+    if (!Array.isArray(serviceCategories) || serviceCategories.length === 0 || !serviceCategories.every((cat: string) => allowedCategories.includes(cat)))
+      errors.push('serviceCategories is required and must be a non-empty array of valid categories.');
     if (price === undefined || typeof price !== 'number' || price < 0)
       errors.push('price is required and must be a non-negative number.');
     if (description && (typeof description !== 'string' || description.length > 500))
@@ -122,7 +123,7 @@ router.post("/", async (req: any, res: any, next: any) => {
         providerId: providerId || null,
         price,
         serviceLocation,
-        serviceCategory,
+        serviceCategories,
         description: description || null,
       },
     });
