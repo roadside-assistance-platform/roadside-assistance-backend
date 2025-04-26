@@ -4,6 +4,27 @@ import logger from "../../utilities/logger";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /clients/{id}:
+ *   delete:
+ *     summary: Soft delete a client by ID
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The client ID
+ *     responses:
+ *       204:
+ *         description: Client marked as deleted
+ *       404:
+ *         description: Client not found
+ *       500:
+ *         description: Server error
+ */
 // DELETE /clients/:id
 router.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;

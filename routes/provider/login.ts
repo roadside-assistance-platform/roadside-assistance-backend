@@ -46,6 +46,8 @@
  *                       $ref: '#/components/schemas/Provider'
  *       401:
  *         description: Authentication failed
+ *       403:
+ *         description: Account has been deleted and cannot be accessed.
  *         content:
  *           application/json:
  *             schema:

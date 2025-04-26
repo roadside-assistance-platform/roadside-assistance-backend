@@ -7,12 +7,14 @@ CREATE TABLE "EmailVerification" (
     "email" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "EmailVerification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Provider" (
+    "deleted" BOOLEAN NOT NULL DEFAULT false,
     "id" TEXT NOT NULL,
     "fullName" TEXT,
     "email" TEXT NOT NULL,
@@ -31,6 +33,7 @@ CREATE TABLE "Provider" (
 
 -- CreateTable
 CREATE TABLE "Client" (
+    "deleted" BOOLEAN NOT NULL DEFAULT false,
     "id" TEXT NOT NULL,
     "fullName" TEXT,
     "email" TEXT NOT NULL,

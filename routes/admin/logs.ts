@@ -8,6 +8,31 @@ const router = express.Router();
 // Adjust this path to your actual log file location
 const LOG_FILE_PATH = path.join(__dirname, "../../logs/combined.log");
 
+/**
+ * @swagger
+ * /admin/logs:
+ *   get:
+ *     summary: Retrieve recent log entries
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: A list of recent log entries (last 200)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   timestamp:
+ *                     type: string
+ *                   level:
+ *                     type: string
+ *                   message:
+ *                     type: string
+ *       500:
+ *         description: Failed to read logs
+ */
 // GET /admin/logs - Return recent log entries
 router.get("/", requireAdmin, async (req: any, res: any) => {
   try {

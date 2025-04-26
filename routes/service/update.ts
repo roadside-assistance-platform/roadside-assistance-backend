@@ -149,6 +149,30 @@ import { validateRequest } from "../../middleware/validation";
 import { catchAsync } from '../../utilities/catchAsync';
 import { isAuthenticated } from "../../middleware/auth";
 
+/**
+ * @swagger
+ * /service/update:
+ *   put:
+ *     summary: Update a service request
+ *     tags: [Service]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Add service update fields here
+ *     responses:
+ *       200:
+ *         description: Service updated
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Service not found
+ *       500:
+ *         description: Server error
+ */
 const router = Router();
 
 // Validation rules for service update

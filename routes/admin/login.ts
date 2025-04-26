@@ -4,6 +4,38 @@ import logger from "../../utilities/logger";
 import { AppError } from "../../utilities/errors";
 import { catchAsync } from "../../utilities/catchAsync";
 
+/**
+ * @swagger
+ * /admin/login:
+ *   post:
+ *     summary: Admin login
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: admin@example.com
+ *               password:
+ *                 type: string
+ *                 example: Admin123!
+ *     responses:
+ *       200:
+ *         description: Admin authenticated and logged in successfully.
+ *       400:
+ *         description: Missing email or password.
+ *       401:
+ *         description: Invalid credentials.
+ *       500:
+ *         description: Authentication error occurred.
+ */
 const router = Router();
 
 // POST /admin/login

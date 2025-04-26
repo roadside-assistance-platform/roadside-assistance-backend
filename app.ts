@@ -69,6 +69,7 @@ const options: swaggerJsdoc.Options = {
           type: "object",
           required: ["id", "email", "fullName", "phone"],
           properties: {
+            deleted: { type: "boolean", description: "Soft delete flag" },
             id: {
               type: "string",
               format: "uuid",

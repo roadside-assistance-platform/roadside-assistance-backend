@@ -117,6 +117,32 @@ import { sendMail } from '../utilities/mailsender';
 import { Router } from "express";
 
 
+/**
+ * @swagger
+ * /email:
+ *   post:
+ *     summary: Verify user email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: Email verified
+ *       400:
+ *         description: Invalid input or verification failed
+ *       500:
+ *         description: Server error
+ */
 const router = Router();
 router.post('/send-code', async (req: any, res: any) => {
   const { email } = req.body as { email: string };

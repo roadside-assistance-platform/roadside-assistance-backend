@@ -4,6 +4,27 @@ import logger from "../../utilities/logger";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /providers/{id}:
+ *   delete:
+ *     summary: Soft delete a provider by ID
+ *     tags: [Providers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The provider ID
+ *     responses:
+ *       204:
+ *         description: Provider marked as deleted
+ *       404:
+ *         description: Provider not found
+ *       500:
+ *         description: Server error
+ */
 // DELETE /providers/:id
 router.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;

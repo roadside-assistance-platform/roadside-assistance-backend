@@ -63,6 +63,20 @@ import prisma from "../../app";
 import { isAuthenticated } from "../../middleware/auth";
 import logger from "../../utilities/logger";
 
+/**
+ * @swagger
+ * /service/info:
+ *   get:
+ *     summary: Get service info
+ *     tags: [Service]
+ *     responses:
+ *       200:
+ *         description: Service info
+ *       404:
+ *         description: Service not found
+ *       500:
+ *         description: Server error
+ */
 const router = Router();
 
 // GET /service/info/:id

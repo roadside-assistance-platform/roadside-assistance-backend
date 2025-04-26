@@ -78,6 +78,28 @@ import prisma from "../../app";
 import logger from "../../utilities/logger";
 import { NotificationService } from "../../services/notification.service";
 
+/**
+ * @swagger
+ * /service/create:
+ *   post:
+ *     summary: Create a new service request
+ *     tags: [Service]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               // Add service request fields here
+ *     responses:
+ *       201:
+ *         description: Service created
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
 const router = Router();
 const notificationService = new NotificationService();
 

@@ -33,6 +33,20 @@ declare global {
   }
 }
 
+/**
+ * @swagger
+ * /home:
+ *   get:
+ *     summary: Get home dashboard/info
+ *     tags: [Home]
+ *     responses:
+ *       200:
+ *         description: Home info/dashboard
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
 const router = Router();
 
 router.get("/", (req: any, res: any) => {

@@ -3,6 +3,26 @@ import { PrismaClient } from "@prisma/client";
 import catchAsync from "../../utils/catchAsync";
 import { requireAdmin } from "../../utils/requireAdmin";
 
+/**
+ * @swagger
+ * /admin/ratings:
+ *   get:
+ *     summary: Get all ratings
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: List of ratings
+ *       500:
+ *         description: Server error
+ *   delete:
+ *     summary: Delete all ratings
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: All ratings deleted
+ *       500:
+ *         description: Server error
+ */
 const router = express.Router();
 const prisma = new PrismaClient();
 
