@@ -102,6 +102,11 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
         logger.warn('Failed login attempt:', { email: req.body.email, info });
         return reject(new AppError('Invalid email or password', 401));
       }
+      // Block login for deleted providers
+      if ((provider as any).deleted) {
+        logger.warn('Login attempt for deleted provider account:', { email: req.body.email });
+        return reject(new AppError('Account has been deleted and cannot be accessed', 403));
+      }
 
       req.logIn(provider, (loginErr: Error | null) => {
         if (loginErr) {

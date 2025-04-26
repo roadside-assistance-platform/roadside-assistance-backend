@@ -4,6 +4,19 @@ import logger from "../../utilities/logger";
 
 const router = Router();
 
+// DELETE /providers/:id
+router.delete('/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    await prisma.provider.update({ where: { id }, data: { deleted: true } });
+    logger.info(`Provider deleted: ${id}`);
+    res.status(204).send();
+  } catch (err) {
+    logger.error('Error deleting provider', { error: err, id });
+    res.status(404).json({ error: 'Provider not found' });
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = 10;

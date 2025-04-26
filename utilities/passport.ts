@@ -13,6 +13,25 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 // Function to generate a random password
 const generateRandomPassword = () => crypto.randomBytes(16).toString("hex");
 
+// Local Strategy for Admins
+passport.use(
+  "admin-local",
+  new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
+    try {
+      const admin = await prisma.admin.findUnique({ where: { email } });
+      if (!admin) return done(null, false, { message: "Admin not found" });
+
+      const isPasswordValid = await comparePassword(password, admin.password);
+      if (!isPasswordValid) return done(null, false, { message: "Invalid password" });
+
+      return done(null, { ...admin, role: "admin" });
+    } catch (error) {
+      console.error("Error in admin authentication:", error);
+      return done(error);
+    }
+  })
+);
+
 // Local Strategy for Clients
 passport.use(
   "client-local",
@@ -144,6 +163,8 @@ passport.deserializeUser(async (data: { id: string; role: string }, done) => {
       user = await prisma.client.findUnique({ where: { id: data.id } });
     } else if (data.role === "provider") {
       user = await prisma.provider.findUnique({ where: { id: data.id } });
+    } else if (data.role === "admin") {
+      user = await prisma.admin.findUnique({ where: { id: data.id } });
     }
     // Attach the role to the user object, so middleware checks will work.
     if (user) {

@@ -4,6 +4,19 @@ import logger from "../../utilities/logger";
 
 const router = Router();
 
+// DELETE /clients/:id
+router.delete('/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    await prisma.client.update({ where: { id }, data: { deleted: true } });
+    logger.info(`Client deleted: ${id}`);
+    res.status(204).send();
+  } catch (err) {
+    logger.error('Error deleting client', { error: err, id });
+    res.status(404).json({ error: 'Client not found' });
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = 10;

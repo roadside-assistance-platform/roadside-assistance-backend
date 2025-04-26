@@ -47,6 +47,19 @@ async function main() {
       }
     });
   }
+
+  // Create admin user
+  const adminEmail = 'admin@example.com';
+  const adminPassword = 'Admin123!';
+  const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+  await prisma.admin.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      password: hashedAdminPassword,
+    },
+  });
 }
 
 main()
