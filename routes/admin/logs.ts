@@ -12,11 +12,11 @@ const LOG_FILE_PATH = path.join(__dirname, "../../logs/combined.log");
  * @swagger
  * /admin/logs:
  *   get:
- *     summary: Retrieve recent log entries
+ *     summary: Retrieve the last 200 log entries
  *     tags: [Admin]
  *     responses:
  *       200:
- *         description: A list of recent log entries (last 200)
+ *         description: A list of the last 200 log entries
  *         content:
  *           application/json:
  *             schema:
@@ -26,12 +26,15 @@ const LOG_FILE_PATH = path.join(__dirname, "../../logs/combined.log");
  *                 properties:
  *                   timestamp:
  *                     type: string
+ *                     description: Timestamp of the log entry
  *                   level:
  *                     type: string
+ *                     description: Log level (e.g., info, error)
  *                   message:
  *                     type: string
+ *                     description: Log message content
  *       500:
- *         description: Failed to read logs
+ *         description: Server error while reading logs
  */
 // GET /admin/logs - Return recent log entries
 router.get("/", requireAdmin, async (req: any, res: any) => {

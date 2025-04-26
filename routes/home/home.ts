@@ -1,26 +1,41 @@
 /**
  * @swagger
- * /:
+ * /home:
  *   get:
- *     summary: Home page
- *     description: Returns a success message if the user is authenticated; otherwise, redirects to the login page.
+ *     summary: Get home dashboard/info
+ *     description: Returns a success message if the user is authenticated; otherwise, returns an unauthorized error.
  *     tags:
  *       - Home
  *     responses:
  *       200:
  *         description: User is authenticated
  *         content:
- *           text/plain:
+ *           application/json:
  *             schema:
- *               type: string
- *               example: Success! You are in home.
- *       302:
- *         description: User is not authenticated and is redirected to the login page.
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Successfully accessed home page
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 
 import { Router, Request, Response } from "express";
 import logger from "../../utilities/logger";
-import { sendMail } from "../../utilities/mailsender"
+import { sendMail } from "../../utilities/mailsender";
 
 // Extend Express Request type to include user
 declare global {
@@ -33,24 +48,9 @@ declare global {
   }
 }
 
-/**
- * @swagger
- * /home:
- *   get:
- *     summary: Get home dashboard/info
- *     tags: [Home]
- *     responses:
- *       200:
- *         description: Home info/dashboard
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
 const router = Router();
 
 router.get("/", (req: any, res: any) => {
-  // Use type assertion for router.get
   try {
     if (!req.isAuthenticated()) {
       logger.warn("Unauthenticated access attempt to home page");
@@ -62,7 +62,6 @@ router.get("/", (req: any, res: any) => {
 
     logger.info("Home page accessed by authenticated user");
 
-    // Optionally send email - wrapped in try-catch
     try {
       sendMail(
         'alpha@gmail.com',
@@ -73,7 +72,6 @@ router.get("/", (req: any, res: any) => {
       );
     } catch (emailError) {
       logger.error('Failed to send email:', emailError);
-      // Don't return here - email failure shouldn't block the response
     }
 
     return res.json({
@@ -81,7 +79,7 @@ router.get("/", (req: any, res: any) => {
       message: 'Successfully accessed home page',
       user: {
         id: req.user?.id,
-        role: (req.user as any)?.role
+        role: req.user?.role
       }
     });
   } catch (error) {
@@ -92,6 +90,5 @@ router.get("/", (req: any, res: any) => {
     });
   }
 });
-
 
 export default router;

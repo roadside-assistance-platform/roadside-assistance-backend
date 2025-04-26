@@ -77,33 +77,10 @@ import { Router } from "express";
 import prisma from "../../app";
 import logger from "../../utilities/logger";
 import { NotificationService } from "../../services/notification.service";
+import { ValidationError } from '../../utilities/errors';
 
-/**
- * @swagger
- * /service/create:
- *   post:
- *     summary: Create a new service request
- *     tags: [Service]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               // Add service request fields here
- *     responses:
- *       201:
- *         description: Service created
- *       400:
- *         description: Invalid input
- *       500:
- *         description: Server error
- */
 const router = Router();
 const notificationService = new NotificationService();
-
-import { ValidationError } from '../../utilities/errors';
 
 router.post("/", async (req: any, res: any, next: any) => {
   const allowedCategories = ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"];

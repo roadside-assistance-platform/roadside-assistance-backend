@@ -45,7 +45,18 @@
  *                     user:
  *                       $ref: '#/components/schemas/Provider'
  *       401:
- *         description: Authentication failed
+ *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Invalid email or password
  *       403:
  *         description: Account has been deleted and cannot be accessed.
  *         content:
@@ -58,10 +69,7 @@
  *                   example: error
  *                 message:
  *                   type: string
- *                   example: Authentication failed
- *                 details:
- *                   type: string
- *                   example: Invalid email or password
+ *                   example: Account has been deleted and cannot be accessed
  *       500:
  *         description: Internal server error
  *         content:
@@ -126,7 +134,8 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
               email: provider.email,
               fullName: provider.fullName,
               phone: provider.phone,
-              photo: provider.photo
+              photo: provider.photo,
+              averageRating: provider.averageRating ?? null
             }
           }
         }));

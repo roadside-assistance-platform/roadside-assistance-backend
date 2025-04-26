@@ -149,37 +149,13 @@ import { validateRequest } from "../../middleware/validation";
 import { catchAsync } from '../../utilities/catchAsync';
 import { isAuthenticated } from "../../middleware/auth";
 
-/**
- * @swagger
- * /service/update:
- *   put:
- *     summary: Update a service request
- *     tags: [Service]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               // Add service update fields here
- *     responses:
- *       200:
- *         description: Service updated
- *       400:
- *         description: Invalid input
- *       404:
- *         description: Service not found
- *       500:
- *         description: Server error
- */
 const router = Router();
 
 // Validation rules for service update
 const serviceUpdateRules = {
   providerId: { type: 'string', optional: true },
   price: { type: 'number', min: 0, optional: true },
-  serviceRating: { type: 'number', min: 1, max: 5, optional: true },
+  rating: { type: 'number', min: 0, max: 5, optional: true }, // Service rating (0-5)
   serviceLocation: { type: 'string', optional: true }, // Optional for update
   done: { type: 'boolean', optional: true }
 };
@@ -226,7 +202,7 @@ router.put("/:id",
       }
 
       // Validate service rating update
-      if (updateData.serviceRating !== undefined) {
+      if (updateData.rating !== undefined) {
         if (existingService.clientId !== userId) {
           logger.error("Only the client can update service rating");
           return res.status(403).send("Only the client can update service rating");
@@ -235,6 +211,8 @@ router.put("/:id",
           logger.error("Cannot rate service before it's completed");
           return res.status(403).send("Cannot rate service before it's completed");
         }
+        // Clamp rating to 0-5 just in case
+        updateData.rating = Math.max(0, Math.min(5, updateData.rating));
       }
 
       // Validate provider assignment
@@ -271,7 +249,8 @@ router.put("/:id",
               id: true,
               fullName: true,
               email: true,
-              phone: true
+              phone: true,
+              averageRating: true
             }
           }
         }
@@ -282,6 +261,25 @@ router.put("/:id",
         updatedBy: userId,
         updates: updateData
       });
+
+      // If rating was updated, recalculate provider's averageRating
+      if (updateData.rating !== undefined && updatedService.providerId) {
+        const providerId = updatedService.providerId;
+        // Get all rated services for this provider
+        const ratedServices = await prisma.service.findMany({
+          where: {
+            providerId: providerId,
+            rating: { not: null }
+          },
+          select: { rating: true }
+        });
+        const ratings = ratedServices.map(s => s.rating!).filter(r => typeof r === 'number');
+        const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+        await prisma.provider.update({
+          where: { id: providerId },
+          data: { averageRating }
+        });
+      }
 
       return res.json({
         status: 'success',

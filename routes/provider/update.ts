@@ -50,12 +50,12 @@
  *             schema:
  *               $ref: '#/components/schemas/Provider'
  *       400:
- *         description: Bad request, invalid ID
+ *         description: Bad request, invalid provider ID or no fields provided for update
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Invalid provider ID"
+ *               example: "Invalid provider ID or no fields provided for update"
  *       404:
  *         description: Provider not found
  *         content:

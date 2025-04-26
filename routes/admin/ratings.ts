@@ -11,17 +11,26 @@ import { requireAdmin } from "../../utils/requireAdmin";
  *     tags: [Admin]
  *     responses:
  *       200:
- *         description: List of ratings
+ *         description: A list of ratings with client and provider details
  *       500:
- *         description: Server error
+ *         description: Internal server error
  *   delete:
- *     summary: Delete all ratings
+ *     summary: Delete a specific rating
  *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The rating ID
  *     responses:
- *       200:
- *         description: All ratings deleted
+ *       204:
+ *         description: Rating deleted successfully
+ *       404:
+ *         description: Rating not found
  *       500:
- *         description: Server error
+ *         description: Internal server error
  */
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -32,7 +41,19 @@ router.get(
   requireAdmin,
   catchAsync(async (req: Request, res: Response) => {
     const ratings = await prisma.service.findMany({
-      include: { client: true, provider: true },
+      include: {
+        client: true,
+        provider: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            photo: true,
+            averageRating: true,
+          },
+        },
+      },
     });
     res.json(ratings);
   })
@@ -44,6 +65,10 @@ router.delete(
   requireAdmin,
   catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
+    const rating = await prisma.service.findUnique({ where: { id } });
+    if (!rating) {
+      return res.status(404).json({ error: "Rating not found" });
+    }
     await prisma.service.delete({ where: { id } });
     res.status(204).send();
   })

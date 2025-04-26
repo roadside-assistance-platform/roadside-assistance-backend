@@ -8,7 +8,7 @@ import { catchAsync } from "../../utilities/catchAsync";
  * @swagger
  * /admin/login:
  *   post:
- *     summary: Admin login
+ *     summary: Authenticate and log in as an admin
  *     tags: [Admin]
  *     requestBody:
  *       required: true
@@ -23,12 +23,34 @@ import { catchAsync } from "../../utilities/catchAsync";
  *               email:
  *                 type: string
  *                 example: admin@example.com
+ *                 description: The admin's email address
  *               password:
  *                 type: string
  *                 example: Admin123!
+ *                 description: The admin's password
  *     responses:
  *       200:
  *         description: Admin authenticated and logged in successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Admin login successful
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
  *       400:
  *         description: Missing email or password.
  *       401:

@@ -45,8 +45,6 @@
  *                       $ref: '#/components/schemas/Client'
  *       401:
  *         description: Authentication failed due to invalid credentials.
- *       403:
- *         description: Account has been deleted and cannot be accessed.
  *         content:
  *           application/json:
  *             schema:
@@ -59,6 +57,16 @@
  *                   type: object
  *                   description: Additional information about the failure.
  *                   example: {}
+ *       403:
+ *         description: Account has been deleted and cannot be accessed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Account has been deleted and cannot be accessed
  *       500:
  *         description: Internal server error occurred during authentication.
  *         content:

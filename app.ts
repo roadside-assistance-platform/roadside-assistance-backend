@@ -290,7 +290,8 @@ app.use("/google/verify", verifygoogleToken);
 app.use("/client/login", loginClient);
 app.use("/client/signup", createClient);
 app.use("/client/update",isAuthenticated,updateClient)
-app.use("/clients", clients); // includes DELETE /clients/:id",isAuthenticated,clients)
+app.use("/client/clients", clients);
+app.use("/client/delete", require("./routes/client/delete").default);
 app.use("/client/info",isAuthenticated,clientInfo)
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
@@ -299,7 +300,8 @@ app.use("/", clientGoogleAuth);
 app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
 app.use("/provider/update",isAuthenticated,updateProvider)
-app.use("/providers", providers); // includes DELETE /providers/:id",isAuthenticated,providers)
+app.use("/provider/providers", providers);
+app.use("/provider/delete", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);

@@ -40,7 +40,8 @@ model Provider {
   photo     String?
   fieldId   String?
   location  String?
-  rating    Int?     @default(0)
+  // Average rating from all completed services (0-5)
+  averageRating Float? @default(0) 
   serviceCategories serviceCategory[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -72,7 +73,8 @@ model Service {
   description    String?
   serviceCategories serviceCategory[]
   price           Int
-  serviceRating   Int?
+  // Rating given by client (0-5)
+  rating   Int? 
   serviceLocation String
   done            Boolean @default(false)
   createdAt       DateTime @default(now())
