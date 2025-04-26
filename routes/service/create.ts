@@ -77,11 +77,10 @@ import { Router } from "express";
 import prisma from "../../app";
 import logger from "../../utilities/logger";
 import { NotificationService } from "../../services/notification.service";
+import { ValidationError } from '../../utilities/errors';
 
 const router = Router();
 const notificationService = new NotificationService();
-
-import { ValidationError } from '../../utilities/errors';
 
 router.post("/", async (req: any, res: any, next: any) => {
   const allowedCategories = ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"];

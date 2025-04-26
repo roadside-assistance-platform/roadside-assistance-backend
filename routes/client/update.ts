@@ -44,7 +44,7 @@
  *             schema:
  *               $ref: '#/components/schemas/Client'
  *       400:
- *         description: Bad request, invalid ID
+ *         description: Bad request, invalid or missing ID
  *         content:
  *           text/plain:
  *             schema:
@@ -56,23 +56,24 @@
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "string"
+ *               example: "Client not found"
  *       500:
  *         description: Internal server error
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "string"
+ *               example: "An error occurred while updating the client"
  */
 
 import prisma from "../../app";
 import { hashPassword } from "../../utilities/bcrypt";
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import logger from "../../utilities/logger";
+
 const router = Router();
 
-router.put("/:id", async (req:any, res:any) => {
+router.put("/:id", async (req: any, res: any) => {
   const { id } = req.params;
   const updateData = req.body;
 

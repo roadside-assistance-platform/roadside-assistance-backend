@@ -64,9 +64,10 @@
  *                   type: string
  *                   example: Google authentication failed for provider
  */
-import {Router} from "express";
+import { Router } from "express";
 import passport from "../../utilities/passport";
 import logger from "../../utilities/logger";
+
 const router = Router();
 
 router.get(

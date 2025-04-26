@@ -3,7 +3,7 @@
  * /client/info/{id}:
  *   get:
  *     summary: Get client info by ID
- *     description: Returns client information by ID. Requires authentication. Password is never returned.
+ *     description: Retrieve detailed information about a client using their unique identifier. Authentication is required, and the client's password is excluded from the response.
  *     tags:
  *       - Client
  *     security:
@@ -15,10 +15,10 @@
  *         schema:
  *           type: string
  *           format: uuid
- *         description: Unique identifier for the client
+ *         description: The unique identifier for the client
  *     responses:
  *       200:
- *         description: Client found
+ *         description: Client information retrieved successfully
  *         content:
  *           application/json:
  *             schema:

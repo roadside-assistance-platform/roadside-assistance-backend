@@ -108,16 +108,16 @@
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "string"
+ *                   example: No verification record found
  */
-// routes/emailVerification.ts
+
 import prisma from '../app';
 import logger from '../utilities/logger';
 import { sendMail } from '../utilities/mailsender';
 import { Router } from "express";
 
-
 const router = Router();
+
 router.post('/send-code', async (req: any, res: any) => {
   const { email } = req.body as { email: string };
 

@@ -3,7 +3,7 @@
  * /provider/info/{id}:
  *   get:
  *     summary: Get provider info by ID
- *     description: Returns provider information by ID. Requires authentication. Password is never returned.
+ *     description: Retrieve provider information using their unique identifier. Requires authentication. The password is not included in the response.
  *     tags:
  *       - Provider
  *     security:
@@ -18,7 +18,7 @@
  *         description: Unique identifier for the provider
  *     responses:
  *       200:
- *         description: Provider found
+ *         description: Provider information retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -38,7 +38,8 @@
  *                         email: "provider@example.com"
  *                         phone: "+1234567890"
  *                         photo: "photo-url"
- *                         serviceCategory: "TOWING"
+ *                         serviceCategories: ["TOWING"]
+ *                         averageRating: 4.5
  *                         createdAt: "2025-04-24T21:35:32.284Z"
  *                         updatedAt: "2025-04-24T21:36:42.285Z"
  *       404:
@@ -75,6 +76,7 @@ router.get("/:id", isAuthenticated, async (req: any, res: any, next: NextFunctio
         phone: true,
         photo: true,
         serviceCategories: true,
+        averageRating: true,
         createdAt: true,
         updatedAt: true,
       },

@@ -18,7 +18,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 description: The client's email or username.
+ *                 description: The client's email.
  *                 example: client@example.com
  *               password:
  *                 type: string
@@ -32,11 +32,17 @@
  *             schema:
  *               type: object
  *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
  *                 message:
  *                   type: string
  *                   example: Login successful
- *                 Client:
- *                   $ref: '#/components/schemas/Client'
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/Client'
  *       401:
  *         description: Authentication failed due to invalid credentials.
  *         content:
@@ -46,11 +52,21 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "string"
+ *                   example: Invalid email or password
  *                 info:
  *                   type: object
  *                   description: Additional information about the failure.
  *                   example: {}
+ *       403:
+ *         description: Account has been deleted and cannot be accessed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Account has been deleted and cannot be accessed
  *       500:
  *         description: Internal server error occurred during authentication.
  *         content:
@@ -60,7 +76,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "string"
+ *                   example: Internal server error
  */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
@@ -87,6 +103,11 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
         logger.warn('Failed login attempt:', { email: req.body.email, info });
         return reject(new AppError('Invalid email or password', 401));
       }
+      // Block login for deleted clients
+      if ((client as any).deleted) {
+        logger.warn('Login attempt for deleted account:', { email: req.body.email });
+        return reject(new AppError('Account has been deleted and cannot be accessed', 403));
+      }
 
       req.logIn(client, (loginErr: Error | null) => {
         if (loginErr) {
@@ -112,6 +133,5 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
     })(req, res, next);
   });
 }));
-
 
 export default router;

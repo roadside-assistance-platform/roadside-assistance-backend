@@ -26,9 +26,13 @@ import providers from "./routes/provider/providers";
 import serviceInfo from "./routes/service/info";
 import clientInfo from "./routes/client/info";
 import providerInfo from "./routes/provider/info";
+import cors from "cors";
+import adminLogin from "./routes/admin/login";
+import adminLogs from "./routes/admin/logs";
+import adminRatings from "./routes/admin/ratings";
 
 
-import { sendMail } from "./utilities/mailsender"
+
 
 
 dotenv.config();
@@ -65,6 +69,7 @@ const options: swaggerJsdoc.Options = {
           type: "object",
           required: ["id", "email", "fullName", "phone"],
           properties: {
+            deleted: { type: "boolean", description: "Soft delete flag" },
             id: {
               type: "string",
               format: "uuid",
@@ -211,20 +216,20 @@ const options: swaggerJsdoc.Options = {
           }
         }
       },
-      securitySchemes: {
-        sessionAuth: {
-          type: "apiKey",
-          in: "cookie",
-          name: "connect.sid",
-          description: "Session-based authentication using cookies"
-        },
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-          description: "JWT token-based authentication"
-        }
-      }
+      // securitySchemes: {
+      //   sessionAuth: {
+      //     type: "apiKey",
+      //     in: "cookie",
+      //     name: "connect.sid",
+      //     description: "Session-based authentication using cookies"
+      //   },
+      //   bearerAuth: {
+      //     type: "http",
+      //     scheme: "bearer",
+      //     bearerFormat: "JWT",
+      //     description: "JWT token-based authentication"
+      //   }
+      // }
     },
     security: [
       { sessionAuth: [] },
@@ -268,6 +273,14 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+//cors
+
+app.use(cors({
+  origin: "http://localhost:3001",
+  credentials: true
+}));
+
+
 // Routes
 
 app.use("/google/verify", verifygoogleToken);
@@ -277,7 +290,8 @@ app.use("/google/verify", verifygoogleToken);
 app.use("/client/login", loginClient);
 app.use("/client/signup", createClient);
 app.use("/client/update",isAuthenticated,updateClient)
-app.use("/client/clients",isAuthenticated,clients)
+app.use("/client/clients", clients);
+app.use("/client/delete", require("./routes/client/delete").default);
 app.use("/client/info",isAuthenticated,clientInfo)
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
@@ -286,10 +300,12 @@ app.use("/", clientGoogleAuth);
 app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
 app.use("/provider/update",isAuthenticated,updateProvider)
-app.use("/provider/providers",isAuthenticated,providers)
+app.use("/provider/providers", providers);
+app.use("/provider/delete", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
+
 //service
 app.use("/service/create", isClient, createService);
 app.use("/service/update", isAuthenticated, updateService);
@@ -300,6 +316,12 @@ app.use("/home",isAuthenticated, home);
 
 //verifyEmail
 app.use("/email", verifyEmail)
+
+// ADMIN ROUTES (all mounted at "/")
+
+app.use("/admin/logs", adminLogs); // GET /logs
+app.use("/admin/ratings", adminRatings); // GET/DELETE /ratings
+app.use("/admin/login", adminLogin); // POST /login
 
 // 404 handler for undefined routes
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

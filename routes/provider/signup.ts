@@ -69,7 +69,40 @@ const createUser = async (role: string, data: any) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Provider'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Signup successful, user is logged in
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         fullName:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         photo:
+ *                           type: string
+ *                         serviceCategories:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                         averageRating:
+ *                           type: number
+ *                           nullable: true
+ *                         role:
+ *                           type: string
+ *                           example: provider
  *       400:
  *         description: Bad request, missing required fields or provider already exists
  *         content:
@@ -119,10 +152,14 @@ router.post("/", async (req: any, res: any) => {
     }
     const hashedPassword = await hashPassword(password);
     const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategories, fieldId: field.id });
+
+    // Fetch the provider again to get averageRating
+    const fullProvider = await prisma.provider.findUnique({ where: { id: newUser.id } });
+
     logger.info(`New provider created: ${email}`);
     
     // Ensure serviceCategories is present on user object for response
-    const userWithRole = { ...newUser, role: 'provider', serviceCategories };
+    const userWithRole = { ...fullProvider, role: 'provider', serviceCategories };
     
     req.login(userWithRole, (err: any) => {
       if (err) {
@@ -145,6 +182,7 @@ router.post("/", async (req: any, res: any) => {
             phone: newUser.phone,
             photo: newUser.photo,
             serviceCategories: userWithRole.serviceCategories,
+            averageRating: userWithRole.averageRating ?? null,
             role: 'provider'
           }
         }

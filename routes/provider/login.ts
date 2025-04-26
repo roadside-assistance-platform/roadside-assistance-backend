@@ -45,7 +45,7 @@
  *                     user:
  *                       $ref: '#/components/schemas/Provider'
  *       401:
- *         description: Authentication failed
+ *         description: Invalid email or password
  *         content:
  *           application/json:
  *             schema:
@@ -56,10 +56,20 @@
  *                   example: error
  *                 message:
  *                   type: string
- *                   example: Authentication failed
- *                 details:
- *                   type: string
  *                   example: Invalid email or password
+ *       403:
+ *         description: Account has been deleted and cannot be accessed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Account has been deleted and cannot be accessed
  *       500:
  *         description: Internal server error
  *         content:
@@ -102,6 +112,11 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
         logger.warn('Failed login attempt:', { email: req.body.email, info });
         return reject(new AppError('Invalid email or password', 401));
       }
+      // Block login for deleted providers
+      if ((provider as any).deleted) {
+        logger.warn('Login attempt for deleted provider account:', { email: req.body.email });
+        return reject(new AppError('Account has been deleted and cannot be accessed', 403));
+      }
 
       req.logIn(provider, (loginErr: Error | null) => {
         if (loginErr) {
@@ -119,7 +134,8 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
               email: provider.email,
               fullName: provider.fullName,
               phone: provider.phone,
-              photo: provider.photo
+              photo: provider.photo,
+              averageRating: provider.averageRating ?? null
             }
           }
         }));
