@@ -80,7 +80,7 @@ const clientSignupRules: ValidationRule[] = [
   { field: 'email', type: 'email', required: true },
   { field: 'password', type: 'string', required: true, minLength: 8, maxLength: 100 },
   { field: 'fullName', type: 'string', required: true, minLength: 2, maxLength: 100 },
-  { field: 'phone', type: 'string', required: true, pattern: /^\+?[1-9]\d{1,14}$/ },
+  { field: 'phone', type: 'string', required: true, pattern: /^\+?\d{2,15}$/ },
   { field: 'photo', type: 'string', required: false }
 ];
 
