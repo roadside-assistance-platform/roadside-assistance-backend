@@ -50,7 +50,9 @@ declare global {
 
 const router = Router();
 
-router.get("/", (req: any, res: any) => {
+import { prisma } from "../../app";
+
+router.get("/", async (req: any, res: any) => {
   try {
     if (!req.isAuthenticated()) {
       logger.warn("Unauthenticated access attempt to home page");
@@ -74,13 +76,22 @@ router.get("/", (req: any, res: any) => {
       logger.error('Failed to send email:', emailError);
     }
 
+    // Fetch and sanitize user info
+    let userInfo = null;
+    if (req.user?.role === 'provider') {
+      userInfo = await prisma.provider.findUnique({ where: { id: req.user.id } });
+    } else if (req.user?.role === 'client') {
+      userInfo = await prisma.client.findUnique({ where: { id: req.user.id } });
+    }
+    if (!userInfo) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+    // Remove password from the returned object if present
+    const { password, ...sanitizedUser } = userInfo;
     return res.json({
       status: 'success',
       message: 'Successfully accessed home page',
-      user: {
-        id: req.user?.id,
-        role: req.user?.role
-      }
+      user: sanitizedUser
     });
   } catch (error) {
     logger.error('Error in home route:', error);
