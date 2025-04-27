@@ -2,11 +2,11 @@
   "name": "passport-js-local-authentification-",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.ts",
   "scripts": {
     "dev": "nodemon app.ts",
     "build": "tsc",
-    "serve": "node dist/index.js",
+    "start": "node dist/app.js",
     "postinstall": "prisma generate"
   },
   "repository": {
