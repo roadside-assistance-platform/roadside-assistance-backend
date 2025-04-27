@@ -148,8 +148,10 @@ import logger from "../../utilities/logger";
 import { validateRequest } from "../../middleware/validation";
 import { catchAsync } from '../../utilities/catchAsync';
 import { isAuthenticated } from "../../middleware/auth";
+import { NotificationService } from "../../services/notification.service";
 
 const router = Router();
+const notificationService = new NotificationService();
 
 // Validation rules for service update
 const serviceUpdateRules = {
@@ -209,7 +211,7 @@ router.put("/:id",
         }
         if (!existingService.done) {
           logger.error("Cannot rate service before it's completed");
-          return res.status(403).send("Cannot rate service before it's completed");
+          return res.status(400).send("Cannot rate service before it's completed");
         }
         // Clamp rating to 0-5 just in case
         updateData.rating = Math.max(0, Math.min(5, updateData.rating));
@@ -261,6 +263,58 @@ router.put("/:id",
         updatedBy: userId,
         updates: updateData
       });
+
+      // Send notifications to client based on service status changes
+      // Notify client when provider is assigned (service accepted)
+      if (updateData.providerId && updatedService.client) {
+        await notificationService.notifyClient(updatedService.client.id, {
+          type: 'SERVICE_STATUS',
+          status: 'ACCEPTED',
+          message: `A provider has accepted your service request.`,
+          serviceId: updatedService.id,
+          timestamp: new Date()
+        });
+      }
+
+      // Notify client when service is started (if you have such a status)
+      if (updateData.status && updateData.status === 'IN_PROGRESS' && updatedService.client) {
+        await notificationService.notifyClient(updatedService.client.id, {
+          type: 'SERVICE_STATUS',
+          status: 'IN_PROGRESS',
+          message: `Your service request is now in progress.`,
+          serviceId: updatedService.id,
+          timestamp: new Date()
+        });
+      }
+
+      // Notify client when provider is en route or arrived (if such statuses are used)
+      if (updateData.status && (updateData.status === 'EN_ROUTE' || updateData.status === 'ARRIVED') && updatedService.client) {
+        await notificationService.notifyClient(updatedService.client.id, {
+          type: 'PROVIDER_ARRIVAL',
+          status: updateData.status,
+          message: updateData.status === 'EN_ROUTE' ? `Your provider is en route.` : `Your provider has arrived at your location.`,
+          serviceId: updatedService.id,
+          timestamp: new Date()
+        });
+      }
+
+      // Notify client when service is completed (done=true)
+      if (updateData.done === true && updatedService.client) {
+        await notificationService.notifyClient(updatedService.client.id, {
+          type: 'SERVICE_STATUS',
+          status: 'COMPLETED',
+          message: `Your service request has been completed.`,
+          serviceId: updatedService.id,
+          timestamp: new Date()
+        });
+        // Send feedback request
+        await notificationService.notifyClient(updatedService.client.id, {
+          type: 'FEEDBACK_REQUEST',
+          message: `Please rate and review your recent service experience.`,
+          serviceId: updatedService.id,
+          timestamp: new Date()
+        });
+      }
 
       // If rating was updated, recalculate provider's averageRating
       if (updateData.rating !== undefined && updatedService.providerId) {

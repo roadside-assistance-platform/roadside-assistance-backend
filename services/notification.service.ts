@@ -4,6 +4,13 @@ import amqp from 'amqplib';
 import prisma from '../app';
 
 export class NotificationService {
+  // Send notification to a specific client
+  async notifyClient(clientId: string, data: any) {
+    await this.init();
+    const queue = `notifications_client_${clientId}`;
+    await this.channel!.assertQueue(queue, { durable: false });
+    this.channel!.sendToQueue(queue, Buffer.from(JSON.stringify(data)));
+  }
   private channel: amqp.Channel | null = null;
 
   async init() {
