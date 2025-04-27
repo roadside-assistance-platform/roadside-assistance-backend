@@ -135,6 +135,7 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
               fullName: provider.fullName,
               phone: provider.phone,
               photo: provider.photo,
+              serviceCategories: provider.serviceCategories,
               averageRating: provider.averageRating ?? null
             }
           }
