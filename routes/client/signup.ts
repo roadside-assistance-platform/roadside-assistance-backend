@@ -96,10 +96,9 @@ const createUser = async (role: 'client' | 'provider', data: any) => {
   }
 };
 
-router.post('/', async (req: any, res: any) => {
+router.post('/', validateRequest(clientSignupRules), async (req: any, res: any) => {
   try {
-    // Validate request body
-    validateRequest(req, clientSignupRules);
+
 
     const { email, password, fullName, phone, photo } = req.body;
 

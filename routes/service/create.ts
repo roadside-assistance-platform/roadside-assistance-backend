@@ -129,6 +129,15 @@ router.post("/", async (req: any, res: any, next: any) => {
     logger.info(`New service created with id: ${newService.id}`);
     // Notify relevant providers for this category with full service info
     await notificationService.notifyProvidersOfNewService(newService);
+    // If a specific provider is assigned, notify only that provider directly
+    if (providerId) {
+      await notificationService.notifyProvider(providerId, {
+        ...newService,
+        type: 'NEW_SERVICE_REQUEST_ASSIGNED',
+        message: 'You have been assigned a new service request.',
+        timestamp: new Date()
+      });
+    }
     return res.status(201).json(newService);
   } catch (error) {
     logger.error("Error occurred while creating the service", { error });
