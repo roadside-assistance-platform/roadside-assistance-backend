@@ -26,10 +26,23 @@ async function sendNotification() {
     channel.sendToQueue(queue, Buffer.from(JSON.stringify({ message, timestamp: new Date() })));
     console.log(`Notification sent to client queue ${queue}:`, message);
   } else if (role === 'provider') {
-    const queue = `notifications_provider_${target}`;
-    await channel.assertQueue(queue, { durable: false });
-    channel.sendToQueue(queue, Buffer.from(JSON.stringify({ message, timestamp: new Date() })));
-    console.log(`Notification sent to provider queue ${queue}:`, message);
+    if (category) {
+      // Broadcast to all providers in the category (single message)
+      const exchangeName = `${category.toLowerCase()}-notifications-exchange`;
+      await channel.assertExchange(exchangeName, 'fanout', { durable: false });
+      const notification = {
+        type: 'NEW_SERVICE_REQUEST',
+        data: { message, timestamp: new Date() }
+      };
+      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(notification)));
+      console.log(`Broadcast notification sent to provider exchange ${exchangeName}:`, message);
+    } else {
+      // Direct to provider's queue
+      const queue = `notifications_provider_${target}`;
+      await channel.assertQueue(queue, { durable: false });
+      channel.sendToQueue(queue, Buffer.from(JSON.stringify({ message, timestamp: new Date() })));
+      console.log(`Notification sent to provider queue ${queue}:`, message);
+    }
   } else if (role === 'admin') {
     const queue = `notifications_admin_${target}`;
     await channel.assertQueue(queue, { durable: false });
