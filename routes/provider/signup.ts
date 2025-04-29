@@ -151,7 +151,7 @@ router.post("/", async (req: any, res: any) => {
       return res.status(400).send("Invalid service category.");
     }
     const hashedPassword = await hashPassword(password);
-    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategories, fieldId: field.id });
+    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategories, fieldId: field.id, isApproved: false });
 
     // Fetch the provider again to get averageRating
     const fullProvider = await prisma.provider.findUnique({ where: { id: newUser.id } });

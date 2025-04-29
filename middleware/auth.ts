@@ -1,12 +1,23 @@
 import { Request, Response, NextFunction } from "express";
+import { AuthenticationError } from '../errors/authentication.error';
+import { catchAsync } from '../utilities/catchAsync';
 
 // Interface for user with role
 interface UserWithRole {
-  role: 'client' | 'provider';
+  role: 'client' | 'provider' | 'admin';
 }
 
-import { AuthenticationError } from '../errors/authentication.error';
-import { catchAsync } from '../utilities/catchAsync';
+// Middleware to allow only admin users
+export const isAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    throw new AuthenticationError('Authentication required. Please log in.');
+  }
+  const user = req.user as UserWithRole;
+  if (!user || user.role !== 'admin') {
+    throw new AuthenticationError('Access denied. Admin access required.');
+  }
+  next();
+});
 
 // Middleware to ensure the user is authenticated
 export const isAuthenticated = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
