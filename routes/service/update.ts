@@ -162,8 +162,11 @@ const serviceUpdateRules = {
   done: { type: 'boolean', optional: true }
 };
 
+import { requireProviderApproval } from "../../middleware/providerApproval";
+
 router.put("/:id", 
   isAuthenticated,
+  requireProviderApproval,
   validateRequest(serviceUpdateRules), 
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;

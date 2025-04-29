@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AppError } from './errors';
 
 export interface ValidationRule {
@@ -12,7 +12,7 @@ export interface ValidationRule {
   pattern?: RegExp;
 }
 
-export const validateRequest = (req: Request, rules: ValidationRule[]) => {
+export const validateRequest = (rules: ValidationRule[]) => (req: Request, res: Response, next: NextFunction) => {
   const errors: string[] = [];
 
   rules.forEach(rule => {
@@ -76,6 +76,7 @@ export const validateRequest = (req: Request, rules: ValidationRule[]) => {
   });
 
   if (errors.length > 0) {
-    throw new AppError(errors.join('. '), 400);
+    return next(new AppError(errors.join(', '), 400));
   }
+  next();
 };

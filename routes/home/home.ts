@@ -79,7 +79,7 @@ router.get("/", async (req: any, res: any) => {
     // Fetch and sanitize user info
     let userInfo = null;
     if (req.user?.role === 'provider') {
-      userInfo = await prisma.provider.findUnique({ where: { id: req.user.id } });
+      userInfo = await prisma.provider.findUnique({ where: { id: req.user.id } }) as any;
     } else if (req.user?.role === 'client') {
       userInfo = await prisma.client.findUnique({ where: { id: req.user.id } });
     }
@@ -88,10 +88,15 @@ router.get("/", async (req: any, res: any) => {
     }
     // Remove password from the returned object if present
     const { password, ...sanitizedUser } = userInfo;
+    let approvalNotice = undefined;
+    if (req.user?.role === 'provider' && userInfo.isApproved) {
+      approvalNotice = 'You have been approved and can now accept services.';
+    }
     return res.json({
       status: 'success',
       message: 'Successfully accessed home page',
-      user: sanitizedUser
+      user: sanitizedUser,
+      ...(approvalNotice && { approvalNotice })
     });
   } catch (error) {
     logger.error('Error in home route:', error);

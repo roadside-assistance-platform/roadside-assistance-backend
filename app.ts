@@ -293,6 +293,7 @@ app.use("/client/update",isAuthenticated,updateClient)
 app.use("/client/clients", clients);
 app.use("/client/delete", require("./routes/client/delete").default);
 app.use("/client/info",isAuthenticated,clientInfo)
+app.use("/client/reset-password", require("./routes/client/resetPassword").default);
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
 
@@ -303,6 +304,7 @@ app.use("/provider/update",isAuthenticated,updateProvider)
 app.use("/provider/providers", providers);
 app.use("/provider/delete", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
+app.use("/provider/reset-password", require("./routes/provider/resetPassword").default);
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 
@@ -318,7 +320,8 @@ app.use("/home",isAuthenticated, home);
 app.use("/email", verifyEmail)
 
 // ADMIN ROUTES (all mounted at "/")
-
+import adminProviders from "./routes/admin/providers";
+app.use("/admin/providers", adminProviders);
 app.use("/admin/logs", adminLogs); // GET /logs
 app.use("/admin/ratings", adminRatings); // GET/DELETE /ratings
 app.use("/admin/login", adminLogin); // POST /login
