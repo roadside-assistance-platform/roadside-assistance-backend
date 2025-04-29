@@ -42,6 +42,7 @@ async function startConsumer() {
       channel.consume(q.queue, (msg) => {
         if (msg !== null) {
           const notification = JSON.parse(msg.content.toString());
+          // With new backend logic, notification has no providerId, all providers receive the same message
           console.log('--- Provider Broadcast Notification Received ---');
           console.log(notification);
           console.log('-----------------------------------------------');

@@ -65,21 +65,19 @@ export class NotificationService {
         });
       }
     } else {
-      // Send only to the relevant category queue for matching providers
-      const relevantProviders = await prisma.provider.findMany({
-        where: {
-          field: {
-            name: (service.serviceCategories && service.serviceCategories[0])
-          }
-        }
-      });
-      for (const provider of relevantProviders) {
-        await this.sendCategoryNotification((service.serviceCategories && service.serviceCategories[0]), provider.id, {
+      // Send a single broadcast to the relevant category exchange
+      const category = (service.serviceCategories && service.serviceCategories[0]);
+      await this.init();
+      const exchangeName = `${category.toLowerCase()}-notifications-exchange`;
+      await this.channel!.assertExchange(exchangeName, 'fanout', { durable: false });
+      const notification = {
+        type: 'NEW_SERVICE_REQUEST',
+        data: {
           ...service,
-          type: 'NEW_SERVICE_REQUEST',
           timestamp: new Date()
-        });
-      }
+        }
+      };
+      this.channel!.publish(exchangeName, '', Buffer.from(JSON.stringify(notification)));
     }
   }
 
