@@ -32,18 +32,37 @@ async function startConsumer() {
       }
     });
   } else if (role === 'provider') {
-    const queue = `notifications_provider_${target}`;
-    await channel.assertQueue(queue, { durable: false });
-    console.log(`Listening for provider notifications on queue: ${queue}`);
-    channel.consume(queue, (msg) => {
-      if (msg !== null) {
-        const notification = JSON.parse(msg.content.toString());
-        console.log('--- Provider Notification Received ---');
-        console.log(notification);
-        console.log('--------------------------------------');
-        channel.ack(msg);
-      }
-    });
+    if (category) {
+      // Listen for broadcast category notifications (all providers in category)
+      const exchangeName = `${category.toLowerCase()}-notifications-exchange`;
+      await channel.assertExchange(exchangeName, 'fanout', { durable: false });
+      const q = await channel.assertQueue('', { exclusive: true });
+      await channel.bindQueue(q.queue, exchangeName, '');
+      console.log(`Listening for provider broadcast notifications on exchange: ${exchangeName}`);
+      channel.consume(q.queue, (msg) => {
+        if (msg !== null) {
+          const notification = JSON.parse(msg.content.toString());
+          console.log('--- Provider Broadcast Notification Received ---');
+          console.log(notification);
+          console.log('-----------------------------------------------');
+          channel.ack(msg);
+        }
+      });
+    } else {
+      // Listen for direct provider notifications
+      const queue = `notifications_provider_${target}`;
+      await channel.assertQueue(queue, { durable: false });
+      console.log(`Listening for provider notifications on queue: ${queue}`);
+      channel.consume(queue, (msg) => {
+        if (msg !== null) {
+          const notification = JSON.parse(msg.content.toString());
+          console.log('--- Provider Notification Received ---');
+          console.log(notification);
+          console.log('--------------------------------------');
+          channel.ack(msg);
+        }
+      });
+    }
   } else if (role === 'admin') {
     const queue = `notifications_admin_${target}`;
     await channel.assertQueue(queue, { durable: false });
