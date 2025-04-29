@@ -54,7 +54,7 @@ const resetPasswordRules: ValidationRule[] = [
  *       500:
  *         description: Internal server error
  */
-router.post("/reset-password", validateRequest(resetPasswordRules), catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+router.post("/", validateRequest(resetPasswordRules), catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { email, newPassword } = req.body;
   const provider = await prisma.provider.findUnique({ where: { email } });
   if (!provider) {
