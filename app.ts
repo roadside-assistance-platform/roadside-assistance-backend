@@ -274,7 +274,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //cors
-
+//change the url
 app.use(cors({
   origin: "http://localhost:3001",
   credentials: true

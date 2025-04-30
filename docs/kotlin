@@ -1,0 +1,120 @@
+# Integrating Notification System (Kotlin Client)
+
+This guide explains how to connect and use the notification system for both providers and clients in the roadside-assistance-backend platform, from a Kotlin application.
+
+---
+
+## Overview
+- **Backend**: Uses RabbitMQ for real-time notifications.
+- **Notification Channels**:
+  - Providers: `notifications_provider_<providerId>`
+  - Clients: `notifications_client_<clientId>`
+- **Protocol**: AMQP (RabbitMQ)
+- **Authentication**: Use your provider/client ID (ensure you have backend-issued credentials for sensitive actions).
+
+---
+
+## Prerequisites
+- Access to the backend's RabbitMQ server (get the `RABBITMQ_URL` from your admin)
+- Your unique `providerId` or `clientId`
+- Add the following dependencies to your Kotlin project:
+
+```kotlin
+dependencies {
+    implementation("com.rabbitmq:amqp-client:5.16.0")
+}
+```
+
+---
+
+## Steps for Kotlin Integration
+
+### 1. Connect to RabbitMQ
+```kotlin
+import com.rabbitmq.client.ConnectionFactory
+
+val factory = ConnectionFactory()
+factory.setUri("amqp://<username>:<password>@<host>:<port>/") // Replace with your RABBITMQ_URL
+val connection = factory.newConnection()
+val channel = connection.createChannel()
+```
+
+### 2. Listen for Notifications
+
+#### For Providers
+```kotlin
+val providerId = "YOUR_PROVIDER_ID"
+val queueName = "notifications_provider_$providerId"
+
+channel.queueDeclare(queueName, false, false, false, null)
+println("Waiting for notifications as provider: $providerId")
+
+val deliverCallback = DeliverCallback { _, delivery ->
+    val message = String(delivery.body, Charsets.UTF_8)
+    println("[Provider Notification] $message")
+}
+channel.basicConsume(queueName, true, deliverCallback, CancelCallback { })
+```
+
+#### For Clients
+```kotlin
+val clientId = "YOUR_CLIENT_ID"
+val queueName = "notifications_client_$clientId"
+
+channel.queueDeclare(queueName, false, false, false, null)
+println("Waiting for notifications as client: $clientId")
+
+val deliverCallback = DeliverCallback { _, delivery ->
+    val message = String(delivery.body, Charsets.UTF_8)
+    println("[Client Notification] $message")
+}
+channel.basicConsume(queueName, true, deliverCallback, CancelCallback { })
+```
+
+---
+
+### 3. Notification Payload Format
+Notifications are sent as JSON objects. Example payloads:
+
+- **Service Status**
+```json
+{
+  "type": "SERVICE_STATUS",
+  "status": "ACCEPTED",
+  "message": "A provider has accepted your service request.",
+  "serviceId": "...",
+  "timestamp": "..."
+}
+```
+- **Provider Arrival**
+```json
+{
+  "type": "PROVIDER_ARRIVAL",
+  "status": "EN_ROUTE" | "ARRIVED",
+  "message": "...",
+  "serviceId": "...",
+  "timestamp": "..."
+}
+```
+
+---
+
+### 4. Sending Notifications (Admin/Testing Only)
+You can publish notifications via backend endpoints or by using the backend's `notification-publisher.ts` script for testing. Direct sending from client apps is not typical for security reasons.
+
+---
+
+## Security Notes
+- Use secure credentials for RabbitMQ.
+- Never expose admin credentials in the client app.
+- Only listen to your own queue.
+
+---
+
+## Troubleshooting
+- If you don't receive notifications, check your RabbitMQ URL, credentials, and queue name.
+- Ensure your backend is running and accessible.
+
+---
+
+For further details, refer to backend maintainers or the API documentation (Swagger).
