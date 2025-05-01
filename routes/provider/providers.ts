@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import prisma from "../../app";
 import logger from "../../utilities/logger";
+import { AppError } from "../../utilities/errors";
 
 const router = Router();
 
@@ -90,6 +91,8 @@ router.get("/", async (req: Request, res: Response) => {
         phone: true,
         photo: true,
         serviceCategories: true,
+        isApproved: true,
+        deleted: true,
         createdAt: true,
         updatedAt: true,
         averageRating: true,
@@ -111,5 +114,41 @@ router.get("/", async (req: Request, res: Response) => {
     res.status(500).send("An error occurred while fetching providers");
   }
 });
+
+/**
+ * @swagger
+ * /provider/providers/{id}/undelete:
+ *   patch:
+ *     summary: Undelete a provider
+ *     tags: [Providers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The provider ID
+ *     responses:
+ *       200:
+ *         description: Provider restored successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     provider:
+ *                       $ref: '#/components/schemas/Provider'
+ *       404:
+ *         description: Provider not found
+ *       500:
+ *         description: Server error
+ */
 
 export default router;

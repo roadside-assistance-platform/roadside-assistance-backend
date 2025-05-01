@@ -280,6 +280,10 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 
 // Routes
 
@@ -302,7 +306,7 @@ app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
 app.use("/provider/update",isAuthenticated,updateProvider)
 app.use("/provider/providers", providers);
-app.use("/provider/delete", require("./routes/provider/delete").default);
+app.use("/provider", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
 app.use("/provider/reset-password", require("./routes/provider/resetPassword").default);
 // Google OAuth for Providers

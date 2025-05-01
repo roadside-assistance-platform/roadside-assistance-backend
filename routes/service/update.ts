@@ -338,11 +338,15 @@ router.put("/:id",
         });
       }
 
-      return res.json({
+      // Format the response to return serviceCategories as a single string
+      const responseService = {
+        ...updatedService,
+        serviceCategory: updatedService.serviceCategories[0] // Convert array to single string
+      };
+
+      return res.status(200).json({
         status: 'success',
-        data: {
-          service: updatedService
-        }
+        data: { service: responseService }
       });
     } catch (error) {
       logger.error("Error updating service", { error, serviceId: id });
