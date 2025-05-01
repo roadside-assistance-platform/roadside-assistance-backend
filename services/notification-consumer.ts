@@ -38,7 +38,7 @@ async function startConsumer() {
       await channel.assertExchange(exchangeName, 'fanout', { durable: false });
       const q = await channel.assertQueue('', { exclusive: true });
       await channel.bindQueue(q.queue, exchangeName, '');
-      console.log(`Listening for provider broadcast notifications on exchange: ${exchangeName}`);
+      console.log(`Listening for provider broadcast notifications on exchange: ${exchangeName}; queue: ${q.queue}`);
       channel.consume(q.queue, (msg) => {
         if (msg !== null) {
           const notification = JSON.parse(msg.content.toString());
