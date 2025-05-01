@@ -125,6 +125,35 @@ router.post("/", async (req: any, res: any, next: any) => {
         serviceCategories: [serviceCategory],
         description: description || null,
       },
+      select: {
+        id: true,
+        clientId: true,
+        providerId: true,
+        description: true,
+        serviceCategories: true,
+        price: true,
+        rating: true,
+        serviceLocation: true,
+        done: true,
+        createdAt: true,
+        updatedAt: true,
+        client: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          }
+        },
+        provider: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          }
+        }
+      }
     });
     logger.info(`New service created with id: ${newService.id}`);
     // Notify relevant providers for this category with full service info
@@ -138,7 +167,15 @@ router.post("/", async (req: any, res: any, next: any) => {
         timestamp: new Date()
       });
     }
-    return res.status(201).json(newService);
+    return res.status(201).json({
+      status: 'success',
+      data: {
+        service: {
+          ...newService,
+          serviceCategories: newService.serviceCategories[0] // Convert array to single string
+        }
+      }
+    });
   } catch (error) {
     logger.error("Error occurred while creating the service", { error });
     next(error);
