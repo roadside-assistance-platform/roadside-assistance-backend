@@ -30,6 +30,7 @@ import cors from "cors";
 import adminLogin from "./routes/admin/login";
 import adminLogs from "./routes/admin/logs";
 import adminRatings from "./routes/admin/ratings";
+import completeService from "./routes/service/complete"
 
 
 
@@ -316,6 +317,7 @@ app.use("/", providerGoogleAuth);
 app.use("/service/create", isClient, createService);
 app.use("/service/update", isAuthenticated, updateService);
 app.use("/service/info",isAuthenticated,serviceInfo)
+app.use("/service/complete",completeService);
 
 //home
 app.use("/home",isAuthenticated, home);
