@@ -151,15 +151,23 @@ router.post("/", async (req: any, res: any) => {
       return res.status(400).send("Invalid service category.");
     }
     const hashedPassword = await hashPassword(password);
-    const newUser = await createUser("provider", { email, password: hashedPassword, fullName, phone, photo, serviceCategories, fieldId: field.id, isApproved: false });
-
-    // Fetch the provider again to get averageRating
-    const fullProvider = await prisma.provider.findUnique({ where: { id: newUser.id } });
+    const provider = await prisma.provider.create({
+      data: {
+        email,
+        password: hashedPassword,
+        fullName,
+        phone,
+        photo,
+        serviceCategories,
+        isApproved: false,
+        deleted: false
+      }
+    });
 
     logger.info(`New provider created: ${email}`);
     
     // Ensure serviceCategories is present on user object for response
-    const userWithRole = { ...fullProvider, role: 'provider', serviceCategories };
+    const userWithRole = { ...provider, role: 'provider', serviceCategories };
     
     req.login(userWithRole, (err: any) => {
       if (err) {
@@ -176,14 +184,16 @@ router.post("/", async (req: any, res: any) => {
         message: 'Signup successful, user is logged in',
         data: {
           user: {
-            id: newUser.id,
-            email: newUser.email,
-            fullName: newUser.fullName,
-            phone: newUser.phone,
-            photo: newUser.photo,
+            id: provider.id,
+            email: provider.email,
+            fullName: provider.fullName,
+            phone: provider.phone,
+            photo: provider.photo,
             serviceCategories: userWithRole.serviceCategories,
-            averageRating: userWithRole.averageRating ?? null,
-            role: 'provider'
+            averageRating: provider.averageRating ?? null,
+            role: 'provider',
+            isApproved: provider.isApproved,
+            deleted: provider.deleted
           }
         }
       });

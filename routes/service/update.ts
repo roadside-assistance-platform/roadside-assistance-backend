@@ -159,7 +159,8 @@ const serviceUpdateRules = {
   price: { type: 'number', min: 0, optional: true },
   rating: { type: 'number', min: 0, max: 5, optional: true }, // Service rating (0-5)
   serviceLocation: { type: 'string', optional: true }, // Optional for update
-  done: { type: 'boolean', optional: true }
+  done: { type: 'boolean', optional: true },
+  distance: { type: 'number', min: 0, optional: true } // Distance in kilometers
 };
 
 import { requireProviderApproval } from "../../middleware/providerApproval";
@@ -195,6 +196,18 @@ router.put("/:id",
       // Authorization check
       const userId = (req.user as any).id;
       const userRole = (req.user as any).role;
+
+      // Check provider approval if user is a provider
+      if (userRole === 'provider') {
+        const provider = await prisma.provider.findUnique({
+          where: { id: userId },
+          select: { isApproved: true }
+        });
+        if (!provider?.isApproved) {
+          logger.error("Provider account is pending approval");
+          return res.status(403).send("Your account is pending approval. You cannot accept or service requests until approved by admin.");
+        }
+      }
 
       const isAuthorized = 
         userRole === 'admin' || 

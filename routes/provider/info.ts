@@ -40,6 +40,8 @@
  *                         photo: "photo-url"
  *                         serviceCategories: ["TOWING"]
  *                         averageRating: 4.5
+ *                         isApproved: true
+ *                         deleted: false
  *                         createdAt: "2025-04-24T21:35:32.284Z"
  *                         updatedAt: "2025-04-24T21:36:42.285Z"
  *       404:
@@ -77,6 +79,8 @@ router.get("/:id", isAuthenticated, async (req: any, res: any, next: NextFunctio
         photo: true,
         serviceCategories: true,
         averageRating: true,
+        isApproved: true,
+        deleted: true,
         createdAt: true,
         updatedAt: true,
       },
