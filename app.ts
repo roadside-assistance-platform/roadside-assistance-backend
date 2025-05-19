@@ -315,7 +315,7 @@ app.use("/", providerGoogleAuth);
 
 //service
 app.use("/service/create", isClient, createService);
-app.use("/service/update", isAuthenticated, updateService);
+app.use("/service/update", updateService);
 app.use("/service/info",isAuthenticated,serviceInfo)
 app.use("/service/complete",completeService);
 
