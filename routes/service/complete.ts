@@ -16,15 +16,15 @@
  *             type: object
  *             required:
  *               - serviceId
- *               - distance
  *               - completionTime
  *             properties:
  *               serviceId:
  *                 type: string
  *                 description: ID of the service being completed
  *               distance:
- *                 type: number
- *                 description: Distance traveled in kilometers
+ *                 type: [number, 'null']
+ *                 nullable: true
+ *                 description: Distance traveled in kilometers (optional, can be null if not applicable)
  *               completionTime:
  *                 type: string
  *                 format: date-time
@@ -71,12 +71,12 @@ router.post("/", async (req: any, res: any, next: any) => {
     const { serviceId, distance, completionTime } = req.body;
 
     // Input validation
-    if (!serviceId || !distance || !completionTime) {
-      throw new ValidationError('serviceId, distance, and completionTime are required');
+    if (!serviceId || !completionTime) {
+      throw new ValidationError('serviceId and completionTime are required');
     }
 
-    if (typeof distance !== 'number' || distance <= 0) {
-      throw new ValidationError('distance must be a positive number');
+    if (distance !== null && (typeof distance !== 'number' || distance <= 0)) {
+      throw new ValidationError('distance must be a positive number or null');
     }
 
     const parsedCompletionTime = new Date(completionTime);
@@ -88,7 +88,7 @@ router.post("/", async (req: any, res: any, next: any) => {
     const service = await prisma.service.findUnique({
       where: { id: serviceId },
       select: {
-        providerId: true,
+        clientId: true,
         done: true
       }
     });
@@ -97,8 +97,8 @@ router.post("/", async (req: any, res: any, next: any) => {
       throw new Error('Service not found');
     }
 
-    if (service.providerId !== req.user.id) {
-      throw new Error('Unauthorized: This service belongs to another provider');
+    if (service.clientId !== req.user.id) {
+      throw new Error('Unauthorized: This service belongs to another client');
     }
 
     if (service.done) {

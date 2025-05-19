@@ -4,12 +4,12 @@ import { serviceCategory as ServiceCategory } from '@prisma/client';
 export class PricingService {
   private readonly prisma: PrismaClient;
   private readonly baseRates: Record<ServiceCategory, number> = {
-    TOWING: 1000,     // 1000 DA base rate
-    FLAT_TIRE: 500,   // 500 DA base rate
-    FUEL_DELIVERY: 800, // 800 DA base rate
-    LOCKOUT: 600,     // 600 DA base rate
-    EMERGENCY: 1200,  // 1200 DA base rate
-    OTHER: 700        // 700 DA base rate
+    TOWING: 10000,     // 10000 DA base rate
+    FLAT_TIRE:7000,   // 7000 DA base rate
+    FUEL_DELIVERY: 1500, // 1500 DA base rate
+    LOCKOUT: 10000,     // 10000 DA base rate
+    EMERGENCY: 12000,  // 12000 DA base rate
+    OTHER: 20000        // 20000 DA base rate
   };
 
   constructor() {
@@ -28,7 +28,7 @@ export class PricingService {
     const baseRate = this.baseRates[category] || this.baseRates.OTHER;
 
     // Distance surcharge (100 DA per km)
-    const distanceSurcharge = distance * 100;
+    const distanceSurcharge = (distance || 0) * 100;
 
     // Time-based surcharge (20% more after 8 PM)
     const isNightTime = startTime.getHours() >= 20 || startTime.getHours() < 6;
