@@ -42,13 +42,60 @@
  *                   type: string
  *                   enum: ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"]
  *                 example: ["TOWING", "FUEL_DELIVERY"]
+ *               isApproved:
+ *                 type: boolean
+ *                 example: true
+ *               deleted:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: Provider updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Provider'
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Provider updated successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     provider:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                         fullName:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         photo:
+ *                           type: string
+ *                           format: uri
+ *                         serviceCategories:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             enum: ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"]
+ *                         averageRating:
+ *                           type: number
+ *                         isApproved:
+ *                           type: boolean
+ *                         deleted:
+ *                           type: boolean
+ *                         createdAt:
+ *                           type: string
+ *                         updatedAt:
+ *                           type: string
  *       400:
  *         description: Bad request, invalid provider ID or no fields provided for update
  *         content:

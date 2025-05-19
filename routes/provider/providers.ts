@@ -82,8 +82,7 @@ router.get("/", async (req: Request, res: Response) => {
 
   try {
     const providers = await prisma.provider.findMany({
-      skip: offset,
-      take: limit,
+      where: { deleted: false },
       select: {
         id: true,
         fullName: true,
@@ -91,12 +90,14 @@ router.get("/", async (req: Request, res: Response) => {
         phone: true,
         photo: true,
         serviceCategories: true,
+        averageRating: true,
         isApproved: true,
         deleted: true,
         createdAt: true,
-        updatedAt: true,
-        averageRating: true,
+        updatedAt: true
       },
+      skip: (page - 1) * limit,
+      take: limit
     });
 
     const totalProviders = await prisma.provider.count();
@@ -144,7 +145,32 @@ router.get("/", async (req: Request, res: Response) => {
  *                   type: object
  *                   properties:
  *                     provider:
- *                       $ref: '#/components/schemas/Provider'
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         fullName:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         photo:
+ *                           type: string
+ *                         serviceCategories:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                         averageRating:
+ *                           type: number
+ *                         isApproved:
+ *                           type: boolean
+ *                         deleted:
+ *                           type: boolean
+ *                         createdAt:
+ *                           type: string
+ *                         updatedAt:
+ *                           type: string
  *       404:
  *         description: Provider not found
  *       500:

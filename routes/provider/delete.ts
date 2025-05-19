@@ -28,8 +28,40 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                 id:
- *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     provider:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                         fullName:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         photo:
+ *                           type: string
+ *                           format: uri
+ *                         serviceCategories:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             enum: ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"]
+ *                         averageRating:
+ *                           type: number
+ *                         isApproved:
+ *                           type: boolean
+ *                         deleted:
+ *                           type: boolean
+ *                         createdAt:
+ *                           type: string
+ *                         updatedAt:
+ *                           type: string
  *       404:
  *         description: Provider not found
  *       500:
@@ -38,9 +70,29 @@ const router = Router();
 router.delete('/delete/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    await prisma.provider.update({ where: { id }, data: { deleted: true } });
+    const provider = await prisma.provider.update({ 
+      where: { id }, 
+      data: { deleted: true }
+    });
     logger.info(`Provider deleted: ${id}`);
-    res.status(200).json({ message: 'Provider deleted successfully', id });
+    res.status(200).json({ 
+      message: 'Provider deleted successfully',
+      data: {
+        provider: {
+          id: provider.id,
+          email: provider.email,
+          fullName: provider.fullName,
+          phone: provider.phone,
+          photo: provider.photo,
+          serviceCategories: provider.serviceCategories,
+          averageRating: provider.averageRating ?? null,
+          isApproved: provider.isApproved,
+          deleted: provider.deleted,
+          createdAt: provider.createdAt,
+          updatedAt: provider.updatedAt
+        }
+      }
+    });
   } catch (err) {
     logger.error('Error deleting provider', { error: err, id });
     res.status(404).json({ error: 'Provider not found' });

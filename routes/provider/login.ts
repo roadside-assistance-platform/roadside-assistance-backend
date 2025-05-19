@@ -43,7 +43,43 @@
  *                   type: object
  *                   properties:
  *                     user:
- *                       $ref: '#/components/schemas/Provider'
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                           description: Provider's unique identifier
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                           description: Provider's email address
+ *                         fullName:
+ *                           type: string
+ *                           description: Provider's full name
+ *                         phone:
+ *                           type: string
+ *                           description: Provider's phone number
+ *                         photo:
+ *                           type: string
+ *                           format: uri
+ *                           description: URL to provider's photo
+ *                         serviceCategories:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             enum: [TOWING, FLAT_TIRE, FUEL_DELIVERY, LOCKOUT, EMERGENCY, OTHER]
+ *                           description: Categories of services the provider offers
+ *                         averageRating:
+ *                           type: number
+ *                           minimum: 0
+ *                           maximum: 5
+ *                           description: Provider's average rating (0-5)
+ *                         isApproved:
+ *                           type: boolean
+ *                           description: Whether the provider's account is approved
+ *                         deleted:
+ *                           type: boolean
+ *                           description: Whether the provider's account is deleted
  *       401:
  *         description: Invalid email or password
  *         content:
@@ -136,7 +172,9 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
               phone: provider.phone,
               photo: provider.photo,
               serviceCategories: provider.serviceCategories,
-              averageRating: provider.averageRating ?? null
+              averageRating: provider.averageRating ?? null,
+              isApproved: provider.isApproved,
+              deleted: provider.deleted
             }
           }
         }));
