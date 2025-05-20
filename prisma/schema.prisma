@@ -75,7 +75,7 @@ model Service {
   serviceCategories serviceCategory[]
   price           Int
   // Rating given by client (0-5)
-  rating   Int? 
+  rating   Float? 
   serviceLocation String
   distance        Float?  // Distance traveled in kilometers
   done            Boolean @default(false)

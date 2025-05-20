@@ -279,7 +279,7 @@ router.put("/:id",
       });
 
       // If rating was updated, recalculate provider's averageRating
-      if (updateData.rating !== undefined && updatedService.providerId) {
+      if (updateData.rating !== undefined && updateData.rating >= 0 && updateData.rating <= 5 && updatedService.providerId) {
         const providerId = updatedService.providerId;
         // Get all rated services for this provider
         const ratedServices = await prisma.service.findMany({
@@ -290,11 +290,12 @@ router.put("/:id",
           select: { rating: true }
         });
         const ratings = ratedServices.map(s => s.rating!).filter(r => typeof r === 'number');
-        const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+        const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b) / ratings.length : 0;
         await prisma.provider.update({
           where: { id: providerId },
-          data: { averageRating }
+          data: { averageRating: parseFloat(averageRating.toFixed(1)) }
         });
+        logger.info(`Updated provider's average rating to ${averageRating.toFixed(1)}`);
       }
 
       // Format the response to return serviceCategories as a single string
