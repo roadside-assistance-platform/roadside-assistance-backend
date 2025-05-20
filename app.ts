@@ -264,40 +264,67 @@ app.use(express.urlencoded({ extended: true }));
 //   })
 // );
 // Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || "your_strong_secret_key_here",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
-    httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined // Set your domain in production
-  },
-  name: 'roadside.sid',
-  proxy: process.env.NODE_ENV === 'production', // Trust the reverse proxy in production
-  rolling: true // Reset the maxAge on every request
-}));
+const isProduction = process.env.NODE_ENV === 'production';
+const isHttps = (req: Request): boolean => 
+  req.headers['x-forwarded-proto'] === 'https' || (req as any).secure;
+
+app.set('trust proxy', 1); // Trust first proxy
+
+app.use((req, res, next) => {
+  // Set secure flag based on protocol
+  const secure = isProduction || isHttps(req);
+  
+  // Configure session with dynamic secure setting
+  session({
+    secret: process.env.SESSION_SECRET || "your_strong_secret_key_here",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: secure,
+      httpOnly: true,
+      sameSite: secure ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      domain: isProduction ? '.yourdomain.com' : undefined // Set your domain in production
+    },
+    name: 'roadside.sid',
+    proxy: isProduction, // Trust the reverse proxy in production
+    rolling: true // Reset the maxAge on every request
+  })(req, res, next);
+});
 app.use(passport.initialize());
 app.use(passport.session());
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://roadside-assistance-admin-dashboard.vercel.app',
+  'https://roadside-assistance-admin-dashboard-*.vercel.app',
+  'https://roadside-assistance-admin-dashboard-git-*.vercel.app'
+];
+
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://roadside-assistance-admin-dashboard.vercel.app',
-    'https://roadside-assistance-admin-dashboard-git-main-apmas-projects-4c4d8c3e.vercel.app',
-    'https://roadside-assistance-admin-dashboard-6fz4s6z8f-apmas-projects-4c4d8c3e.vercel.app',
-    'https://roadside-assistance-admin-dashboard.vercel.app',
-    'https://roadside-assistance-admin-dashboard-git-main-apmas-projects-4c4d8c3e.vercel.app',
-    'https://roadside-assistance-admin-dashboard-6fz4s6z8f-apmas-projects-4c4d8c3e.vercel.app'
-  ],
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.some(allowedOrigin => 
+      origin === allowedOrigin || 
+      origin.match(new RegExp(allowedOrigin.replace('*', '.*')))
+    );
+    
+    if (isAllowed || !isProduction) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['set-cookie']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-XSRF-TOKEN'],
+  exposedHeaders: ['set-cookie', 'xsrf-token'],
+  maxAge: 600 // 10 minutes for preflight cache
 };
 
 app.use(cors(corsOptions));
