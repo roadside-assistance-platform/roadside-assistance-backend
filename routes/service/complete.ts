@@ -108,9 +108,34 @@ router.post("/", async (req: any, res: any, next: any) => {
     // Complete the service and calculate price
     await pricingService.completeService(serviceId, distance, parsedCompletionTime);
 
-    const completedService = await prisma.service.findUnique({ where: { id: serviceId } });
+    const completedService = await prisma.service.findUnique({
+      where: { id: serviceId },
+      include: {
+        provider: {
+          select: { id: true }
+        }
+      }
+    });
     if (!completedService) {
       throw new Error('Service not found after completion');
+    }
+
+    // Update provider's average rating if they have ratings
+    if (completedService.provider && completedService.provider.id) {
+      const providerId = completedService.provider.id;
+      const ratedServices = await prisma.service.findMany({
+        where: {
+          providerId: providerId,
+          rating: { not: null }
+        },
+        select: { rating: true }
+      });
+      const ratings = ratedServices.map(s => s.rating!).filter(r => typeof r === 'number');
+      const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+      await prisma.provider.update({
+        where: { id: providerId },
+        data: { averageRating }
+      });
     }
 
     res.status(200).json({
