@@ -38,7 +38,8 @@ export class PricingService {
     const price = baseRate + distanceSurcharge;
     const finalPrice = price * (1 + timeSurcharge);
 
-    return Math.round(finalPrice);
+    // Ensure we store only the integer part of the price
+    return parseInt(finalPrice.toFixed(0));
   }
 
   /**
