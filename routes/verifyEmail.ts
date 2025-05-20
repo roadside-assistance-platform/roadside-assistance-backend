@@ -40,6 +40,14 @@ router.post('/send-code', async (req: any, res: any) => {
     // Generate a simple 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     
+    // Save the verification code to the database
+    await prisma.verificationCode.create({
+      data: {
+        email,
+        code,
+      },
+    });
+    
     // Log the code for testing purposes
     logger.info(`Verification code for ${email}: ${code}`);
 
@@ -152,6 +160,14 @@ router.post('/forgot-code', async (req: any, res: any) => {
     // Generate a simple 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     
+    // Save the verification code to the database
+    await prisma.verificationCode.create({
+      data: {
+        email,
+        code,
+      },
+    });
+    
     // Log the code for testing purposes
     logger.info(`Verification code for ${email}: ${code}`);
 
@@ -221,6 +237,88 @@ router.post('/forgot-code', async (req: any, res: any) => {
   } catch (error) {
     logger.error('Failed to send verification code:', error);
     return res.status(500).json({ error: 'Failed to send verification code' });
+  }
+});
+
+/**
+ * @swagger
+ * /verify-code:
+ *   post:
+ *     summary: Verify the code sent to the user's email
+ *     tags: [EmailVerification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Email and code are required
+ *       404:
+ *         description: No verification record found for this email
+ *       410:
+ *         description: Verification code has expired
+ *       403:
+ *         description: Invalid verification code
+ */
+router.post('/verify-code', async (req: any, res: any) => {
+  const { email, code } = req.body as { email: string; code: string };
+
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required' });
+  }
+
+  try {
+    // Find the verification record
+    const verification = await prisma.verificationCode.findFirst({
+      where: { email, code },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!verification) {
+      return res.status(404).json({ error: 'No verification record found for this email' });
+    }
+
+    // Check if code is expired (15 minutes)
+    const expirationTime = 15 * 60 * 1000; // 15 minutes in milliseconds
+    const isExpired = new Date().getTime() - verification.createdAt.getTime() > expirationTime;
+    
+    if (isExpired) {
+      // Delete the expired verification code
+      await prisma.verificationCode.delete({
+        where: { id: verification.id }
+      });
+      return res.status(410).json({ error: 'Verification code has expired' });
+    }
+
+    // Mark the verification code as used
+    await prisma.verificationCode.update({
+      where: { id: verification.id },
+      data: { 
+        used: true,
+        updatedAt: new Date()
+      }
+    });
+
+    return res.status(200).json({ 
+      message: 'Email verified successfully',
+      email: verification.email
+    });
+  } catch (error) {
+    logger.error('Failed to verify code:', error);
+    return res.status(500).json({ error: 'Failed to verify code' });
   }
 });
 
