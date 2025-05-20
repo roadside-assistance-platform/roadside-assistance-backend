@@ -45,7 +45,8 @@ router.post('/send-code', async (req: any, res: any) => {
 
     // Send the email with the code using the same template as forgot-code
     await sendMail(
-      email,
+      process.env.EMAIL_USERNAME!, // from
+      email, // to
       'Your Verification Code',
       `Your verification code is: ${code}`,
       `<!DOCTYPE html>
@@ -156,7 +157,8 @@ router.post('/forgot-code', async (req: any, res: any) => {
 
     // Send the email with the code using the same template as send-code
     await sendMail(
-      email,
+      process.env.EMAIL_USERNAME!, // from
+      email, // to
       'Your Depan.Go Verification Code',
       `Depan.Go Email Verification
       
