@@ -176,111 +176,105 @@ router.put("/:id",
       return res.status(400).send("Service ID is required");
     }
 
-    try {
-      // Check if service exists
-      const existingService = await prisma.service.findUnique({ 
-        where: { id },
-        include: {
-          client: true,
-          provider: true
-        }
+    // Check if service exists
+    const existingService = await prisma.service.findUnique({ 
+      where: { id },
+      include: {
+        client: true,
+        provider: true
+      }
+    });
+
+    if (!existingService) {
+      logger.error("Service not found");
+      return res.status(404).send("Service not found");
+    }
+
+    // Validate service rating update
+    if (updateData.rating !== undefined) {
+      if (!existingService.clientId) {
+        logger.error('Cannot add rating: Service has no client');
+        return res.status(400).json({
+          status: 'error',
+          message: 'Cannot add rating: Service has no client'
+        });
+      }
+      
+      const providerId = existingService.providerId;
+      if (!providerId) {
+        logger.error('Cannot add rating: Service has no provider assigned');
+        return res.status(400).json({
+          status: 'error',
+          message: 'Cannot add rating: Service has no provider assigned'
+        });
+      }
+    }
+
+    // Validate provider assignment
+    if (updateData.providerId !== undefined) {
+      // Only allow if not already assigned
+      if (existingService.providerId) {
+        logger.error("Service already accepted by another provider");
+        return res.status(409).send("Service already accepted by another provider");
+      }
+      // Verify provider exists
+      const provider = await prisma.provider.findUnique({
+        where: { id: updateData.providerId }
       });
-
-      if (!existingService) {
-        logger.error("Service not found");
-        return res.status(404).send("Service not found");
+      if (!provider) {
+        logger.error("Provider not found");
+        return res.status(404).send("Provider not found");
       }
+    }
 
-      // Authorization check
-      const userId = (req.user as any).id;
-      const userRole = (req.user as any).role;
-
-      // Check provider approval if user is a provider
-      if (userRole === 'provider') {
-        const provider = await prisma.provider.findUnique({
-          where: { id: userId },
-          select: { isApproved: true }
-        });
-        if (!provider?.isApproved) {
-          logger.error("Provider account is pending approval");
-          return res.status(403).send("Your account is pending approval. You cannot accept or service requests until approved by admin.");
-        }
-      }
-
-      const isAuthorized = 
-        userRole === 'admin' || 
-        existingService.clientId === userId ||
-        existingService.providerId === userId;
-
-      if (!isAuthorized) {
-        logger.error("Not authorized to update this service");
-        return res.status(403).send("Not authorized to update this service");
-      }
-
-      // Validate service rating update
-      if (updateData.rating !== undefined) {
-        if (existingService.clientId !== userId) {
-          logger.error("Only the client can update service rating");
-          return res.status(403).send("Only the client can update service rating");
-        }
-        if (!existingService.done) {
-          logger.error("Cannot rate service before it's completed");
-          return res.status(400).send("Cannot rate service before it's completed");
-        }
-        // Clamp rating to 0-5 just in case
-        updateData.rating = Math.max(0, Math.min(5, updateData.rating));
-      }
-
-      // Validate provider assignment
-      if (updateData.providerId !== undefined) {
-        // Only allow if not already assigned
-        if (existingService.providerId) {
-          logger.error("Service already accepted by another provider");
-          return res.status(409).send("Service already accepted by another provider");
-        }
-        // Verify provider exists
-        const provider = await prisma.provider.findUnique({
-          where: { id: updateData.providerId }
-        });
-        if (!provider) {
-          logger.error("Provider not found");
-          return res.status(404).send("Provider not found");
-        }
-      }
-
-      const updatedService = await prisma.service.update({
-        where: { id },
-        data: updateData,
-        include: {
-          client: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              phone: true
-            }
-          },
-          provider: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              phone: true,
-              averageRating: true
-            }
+    const updatedService = await prisma.service.update({
+      where: { id },
+      data: updateData,
+      include: {
+        client: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true
+          }
+        },
+        provider: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            averageRating: true
           }
         }
-      });
+      }
+    });
 
       logger.info("Service updated successfully", {
         serviceId: id,
-        updatedBy: userId,
         updates: updateData
       });
 
-      // If rating was updated, recalculate provider's averageRating
-      if (updateData.rating !== undefined && updateData.rating >= 0 && updateData.rating <= 5 && updatedService.providerId) {
-        const providerId = updatedService.providerId;
+      // If rating was updated, validate rating
+      if (updateData.rating !== undefined) {
+        if (updateData.rating < 0 || updateData.rating > 5) {
+          logger.error('Rating must be between 0 and 5');
+          return res.status(400).json({
+            status: 'error',
+            message: 'Rating must be between 0 and 5'
+          });
+        }
+
+        const providerId = existingService.providerId;
+        if (!providerId) {
+          logger.error('Cannot add rating: Service has no provider assigned');
+          return res.status(400).json({
+            status: 'error',
+            message: 'Cannot add rating: Service has no provider assigned'
+          });
+        }
+
         // Get all rated services for this provider
         const ratedServices = await prisma.service.findMany({
           where: {
@@ -290,7 +284,7 @@ router.put("/:id",
           select: { rating: true }
         });
         const ratings = ratedServices.map(s => s.rating!).filter(r => typeof r === 'number');
-        const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b) / ratings.length : 0;
+        const averageRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
         await prisma.provider.update({
           where: { id: providerId },
           data: { averageRating: parseFloat(averageRating.toFixed(1)) }
@@ -308,10 +302,6 @@ router.put("/:id",
         status: 'success',
         data: { service: responseService }
       });
-    } catch (error) {
-      logger.error("Error updating service", { error, serviceId: id });
-      next(error);
-    }
   })
 );
 
