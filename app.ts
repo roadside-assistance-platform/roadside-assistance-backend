@@ -27,9 +27,7 @@ import serviceInfo from "./routes/service/info";
 import clientInfo from "./routes/client/info";
 import providerInfo from "./routes/provider/info";
 import cors from "cors";
-import adminLogin from "./routes/admin/login";
-import adminLogs from "./routes/admin/logs";
-import adminRatings from "./routes/admin/ratings";
+import adminRoutes from "./routes/admin";
 import completeService from "./routes/service/complete"
 
 
@@ -265,21 +263,44 @@ app.use(express.urlencoded({ extended: true }));
 //     cookie: { maxAge: 86400000 }, // 1 day
 //   })
 // );
+// Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || "your_secret",
+  secret: process.env.SESSION_SECRET || "your_strong_secret_key_here",
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to `true` in production with HTTPS
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined // Set your domain in production
+  },
+  name: 'roadside.sid',
+  proxy: process.env.NODE_ENV === 'production', // Trust the reverse proxy in production
+  rolling: true // Reset the maxAge on every request
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-//cors
-//change the url
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true
-}));
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://roadside-assistance-admin-dashboard.vercel.app',
+    'https://roadside-assistance-admin-dashboard-git-main-apmas-projects-4c4d8c3e.vercel.app',
+    'https://roadside-assistance-admin-dashboard-6fz4s6z8f-apmas-projects-4c4d8c3e.vercel.app',
+    'https://roadside-assistance-admin-dashboard.vercel.app',
+    'https://roadside-assistance-admin-dashboard-git-main-apmas-projects-4c4d8c3e.vercel.app',
+    'https://roadside-assistance-admin-dashboard-6fz4s6z8f-apmas-projects-4c4d8c3e.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['set-cookie']
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -325,12 +346,8 @@ app.use("/home",isAuthenticated, home);
 //verifyEmail
 app.use("/email", verifyEmail)
 
-// ADMIN ROUTES (all mounted at "/")
-import adminProviders from "./routes/admin/providers";
-app.use("/admin/providers", adminProviders);
-app.use("/admin/logs", adminLogs); // GET /logs
-app.use("/admin/ratings", adminRatings); // GET/DELETE /ratings
-app.use("/admin/login", adminLogin); // POST /login
+// ADMIN ROUTES
+app.use("/admin", adminRoutes);
 
 // 404 handler for undefined routes
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

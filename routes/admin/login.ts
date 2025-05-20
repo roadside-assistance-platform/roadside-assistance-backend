@@ -75,13 +75,32 @@ router.post(
       if (!admin) {
         return next(new AppError("Invalid credentials", 401));
       }
+      
+      // Manually establish the session
       req.logIn(admin, (err) => {
         if (err) return next(new AppError("Error logging in", 500));
-        logger.info("Admin login successful:", { email: admin.email });
+        
+        logger.info("Admin login successful:", { email: admin.email, userId: admin.id });
+        
+        // Set a secure, HTTP-only cookie with the session ID
+        res.cookie('roadside.sid', (req.session as any).id, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+          path: '/',
+        });
+        
+        // Return success response with user data
         return res.status(200).json({
           status: "success",
           message: "Admin login successful",
-          user: { id: admin.id, email: admin.email, role: admin.role },
+          user: { 
+            id: admin.id, 
+            email: admin.email, 
+            role: admin.role,
+            name: admin.fullName || admin.email.split('@')[0]
+          },
         });
       });
     })(req, res, next);
