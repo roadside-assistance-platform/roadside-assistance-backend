@@ -255,14 +255,14 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET || "default_secret",
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: { maxAge: 86400000 }, // 1 day
-//   })
-// );
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default_secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 86400000 }, // 1 day
+  })
+);
 // Session configuration
 const isProduction = process.env.NODE_ENV === 'production';
 const isHttps = (req: Request): boolean => 
@@ -270,27 +270,27 @@ const isHttps = (req: Request): boolean =>
 
 app.set('trust proxy', 1); // Trust first proxy
 
-app.use((req, res, next) => {
-  // Set secure flag based on protocol
-  const secure = isProduction || isHttps(req);
+// app.use((req, res, next) => {
+//   // Set secure flag based on protocol
+//   const secure = isProduction || isHttps(req);
   
-  // Configure session with dynamic secure setting
-  session({
-    secret: process.env.SESSION_SECRET || "your_strong_secret_key_here",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: secure,
-      httpOnly: true,
-      sameSite: secure ? 'none' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      domain: isProduction ? '.yourdomain.com' : undefined // Set your domain in production
-    },
-    name: 'roadside.sid',
-    proxy: isProduction, // Trust the reverse proxy in production
-    rolling: true // Reset the maxAge on every request
-  })(req, res, next);
-});
+//   // Configure session with dynamic secure setting
+// //   session({
+// //     secret: process.env.SESSION_SECRET || "your_strong_secret_key_here",
+// //     resave: false,
+// //     saveUninitialized: false,
+// //     cookie: {
+// //       secure: secure,
+// //       httpOnly: true,
+// //       sameSite: secure ? 'none' : 'lax',
+// //       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+// //       domain: isProduction ? '.yourdomain.com' : undefined // Set your domain in production
+// //     },
+// //     name: 'roadside.sid',
+// //     proxy: isProduction, // Trust the reverse proxy in production
+// //     rolling: true // Reset the maxAge on every request
+// //   })(req, res, next);
+// });
 app.use(passport.initialize());
 app.use(passport.session());
 
