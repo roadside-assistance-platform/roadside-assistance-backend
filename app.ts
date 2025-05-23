@@ -358,6 +358,7 @@ app.use("/provider/providers", providers);
 app.use("/provider", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
 app.use("/provider/reset-password", require("./routes/provider/resetPassword").default);
+app.use("/provider/is-approved/:id", isAuthenticated, require("./routes/provider/isApproved").isProviderApproved);
 // Google OAuth for Providers
 app.use("/", providerGoogleAuth);
 
