@@ -29,6 +29,8 @@ import providerInfo from "./routes/provider/info";
 import cors from "cors";
 import adminRoutes from "./routes/admin";
 import completeService from "./routes/service/complete"
+import ratings from "./routes/admin/ratings"
+import dashboard from "./routes/admin/dashboard"
 
 
 
@@ -377,6 +379,22 @@ app.use("/email", verifyEmail)
 // ADMIN ROUTES
 app.use("/admin", adminRoutes);
 
+//ratings
+app.use("/admin/ratings", ratings)
+
+//dashboard
+app.use("/admin/dashboard", dashboard)
+
+//logs
+app.use("/admin/logs", logs)
+
+//providers
+app.use("/admin/providers", providers)
+
+//verify-session
+app.use("/admin/verify-session", verifySession)
+
+
 // 404 handler for undefined routes
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(new NotFoundError(`Can't find ${req.originalUrl} on this server!`));
@@ -384,6 +402,8 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 
 // Global error handler
 import { globalErrorHandler } from './middleware/errorHandler';
+import logs from "./routes/admin/logs";
+import verifySession from "./routes/admin/verify-session";
 app.use(globalErrorHandler);
 
 export default prisma;
