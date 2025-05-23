@@ -31,6 +31,9 @@ import adminRoutes from "./routes/admin";
 import completeService from "./routes/service/complete"
 import ratings from "./routes/admin/ratings"
 import dashboard from "./routes/admin/dashboard"
+import logs from "./routes/admin/logs"
+import verifySession from "./routes/admin/verify-session";
+
 
 
 
@@ -402,8 +405,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 
 // Global error handler
 import { globalErrorHandler } from './middleware/errorHandler';
-import logs from "./routes/admin/logs";
-import verifySession from "./routes/admin/verify-session";
+
 app.use(globalErrorHandler);
 
 export default prisma;
