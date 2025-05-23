@@ -358,7 +358,7 @@ app.use("/", clientGoogleAuth);
 //provider
 app.use("/provider/login", loginProvider);
 app.use("/provider/signup", createProvider);
-app.use("/provider/update",isAuthenticated,updateProvider)
+app.use("/provider/update",updateProvider)
 app.use("/provider/providers", providers);
 app.use("/provider", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
