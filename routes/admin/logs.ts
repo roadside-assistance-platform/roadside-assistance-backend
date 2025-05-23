@@ -37,10 +37,11 @@ const LOG_FILE_PATH = path.join(__dirname, "../../logs/combined.log");
  *         description: Server error while reading logs
  */
 // GET /admin/logs - Return recent log entries
-router.get("/", requireAdmin, async (req: any, res: any) => {
+router.get("/", requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
     if (!fs.existsSync(LOG_FILE_PATH)) {
-      return res.json([]);
+      res.json([]);
+      return;
     }
     const logData = fs.readFileSync(LOG_FILE_PATH, "utf-8");
     // Assume each log entry is a JSON line
@@ -49,13 +50,16 @@ router.get("/", requireAdmin, async (req: any, res: any) => {
       try {
         return JSON.parse(line);
       } catch {
-        return { timestamp: new Date().toISOString(), level: "raw", message: line };
+        return null;
       }
-    });
-    // Return the last 200 entries (most recent last)
-    res.json(entries.slice(-200));
+    }).filter(Boolean);
+
+    // Return the last 200 entries (most recent)
+    const last200Entries = entries.slice(-200);
+    res.json(last200Entries);
   } catch (err) {
     res.status(500).json({ error: "Failed to read logs" });
+    return;
   }
 });
 
