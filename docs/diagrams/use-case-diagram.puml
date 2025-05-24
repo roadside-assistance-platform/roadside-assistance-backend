@@ -1,0 +1,110 @@
+@startuml RoadsideAssistanceUseCases
+
+!theme plain
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseStyle rectangle
+
+' Define actors
+actor Client as client
+actor Provider as provider  
+actor Admin as admin
+actor "Email System" as email
+actor "Google OAuth" as google
+
+' Define system boundary
+rectangle "Roadside Assistance System" {
+  
+  package "Authentication" {
+    usecase "Register Account" as UC001
+    usecase "Login with Credentials" as UC002  
+    usecase "Login with Google OAuth" as UC003
+    usecase "Reset Password" as UC005
+    usecase "Verify Email" as UC024
+  }
+  
+  package "Client Services" {
+    usecase "Update Profile" as UC004
+    usecase "Request Service" as UC006
+    usecase "View Service Status" as UC007
+    usecase "Rate Service" as UC008
+  }
+  
+  package "Provider Services" {
+    usecase "Register as Provider" as UC009
+    usecase "Update Provider Profile" as UC012
+    usecase "View Available Services" as UC013
+    usecase "Accept Service Request" as UC014
+    usecase "Update Service Progress" as UC015
+    usecase "Complete Service" as UC016
+  }
+  
+  package "Admin Services" {
+    usecase "Admin Login" as UC017
+    usecase "Approve Provider" as UC018
+    usecase "Manage Users" as UC019
+    usecase "View Dashboard" as UC020
+    usecase "Manage Categories" as UC021
+    usecase "View Logs" as UC022
+    usecase "Generate Reports" as UC023
+  }
+  
+  package "Notifications" {
+    usecase "Send Notifications" as UC025
+  }
+}
+
+' Client relationships
+client --> UC001
+client --> UC002
+client --> UC003
+client --> UC004
+client --> UC005
+client --> UC006
+client --> UC007
+client --> UC008
+
+' Provider relationships  
+provider --> UC009
+provider --> UC002
+provider --> UC003
+provider --> UC012
+provider --> UC013
+provider --> UC014
+provider --> UC015
+provider --> UC016
+
+' Admin relationships
+admin --> UC017
+admin --> UC018
+admin --> UC019
+admin --> UC020
+admin --> UC021
+admin --> UC022
+admin --> UC023
+
+' External system relationships
+email --> UC024
+email --> UC025
+google --> UC003
+
+' Include relationships
+UC005 ..> UC024 : <<include>>
+UC001 ..> UC024 : <<include>>
+UC014 ..> UC025 : <<include>>
+UC015 ..> UC025 : <<include>>
+UC016 ..> UC025 : <<include>>
+
+' Extend relationships
+UC003 ..> UC002 : <<extend>>
+UC005 ..> UC002 : <<extend>>
+UC008 ..> UC016 : <<extend>>
+
+' Notes
+note right of UC009 : Requires admin approval\nbefore providers can\naccept services
+
+note right of UC024 : 15-minute expiration\ntime for codes
+
+note bottom of UC018 : Only approved providers\ncan accept service\nrequests
+
+@enduml

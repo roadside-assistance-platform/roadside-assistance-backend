@@ -26,6 +26,8 @@ import providers from "./routes/provider/providers";
 import serviceInfo from "./routes/service/info";
 import clientInfo from "./routes/client/info";
 import providerInfo from "./routes/provider/info";
+import providerHistory from "./routes/provider/history";
+import clientHistory from "./routes/client/history";
 import cors from "cors";
 import adminRoutes from "./routes/admin";
 import completeService from "./routes/service/complete"
@@ -351,6 +353,7 @@ app.use("/client/update",isAuthenticated,updateClient)
 app.use("/client/clients", clients);
 app.use("/client/delete", require("./routes/client/delete").default);
 app.use("/client/info",isAuthenticated,clientInfo)
+app.use("/client/history", clientHistory);
 app.use("/client/reset-password", require("./routes/client/resetPassword").default);
 // Google OAuth for Clients
 app.use("/", clientGoogleAuth);
@@ -362,6 +365,7 @@ app.use("/provider/update",updateProvider)
 app.use("/provider/providers", providers);
 app.use("/provider", require("./routes/provider/delete").default);
 app.use("/provider/info",isAuthenticated,providerInfo)
+app.use("/provider/history", providerHistory);
 app.use("/provider/reset-password", require("./routes/provider/resetPassword").default);
 app.use("/provider/is-approved/:id", isAuthenticated, require("./routes/provider/isApproved").isProviderApproved);
 // Google OAuth for Providers
