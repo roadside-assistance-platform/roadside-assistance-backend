@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import catchAsync from "../../utils/catchAsync";
-import { requireAdmin } from "../../utils/requireAdmin";
 
 /**
  * @swagger
@@ -35,10 +34,9 @@ import { requireAdmin } from "../../utils/requireAdmin";
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// GET /admin/ratings - List all ratings/reviews
+// GET /admin/ratings - List all ratings/reviews (public)
 router.get(
   "/ratings",
-  requireAdmin,
   catchAsync(async (req: Request, res: Response) => {
     const ratings = await prisma.service.findMany({
       include: {
@@ -59,10 +57,9 @@ router.get(
   })
 );
 
-// DELETE /admin/ratings/:id - Remove a rating/review
+// DELETE /admin/ratings/:id - Remove a rating/review (public)
 router.delete(
   "/ratings/:id",
-  requireAdmin,
   catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const rating = await prisma.service.findUnique({ where: { id } });
