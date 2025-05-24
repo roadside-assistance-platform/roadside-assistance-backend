@@ -2,8 +2,8 @@
  * @swagger
  * /provider/login:
  *   post:
- *     summary: Provider login
- *     description: Authenticates a provider using email and password and logs them in.
+ *     summary: Authenticate and log in a provider
+ *     description: Authenticates a provider using the local strategy and logs them into the system.
  *     tags:
  *       - Provider
  *     requestBody:
@@ -18,16 +18,15 @@
  *             properties:
  *               email:
  *                 type: string
- *                 format: email
+ *                 description: The provider's email.
  *                 example: provider@example.com
- *                 description: The provider's email address
  *               password:
  *                 type: string
+ *                 description: The provider's password.
  *                 example: password123
- *                 description: The provider's password
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Provider authenticated and logged in successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -43,53 +42,14 @@
  *                   type: object
  *                   properties:
  *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                           description: Provider's unique identifier
- *                         email:
- *                           type: string
- *                           format: email
- *                           description: Provider's email address
- *                         fullName:
- *                           type: string
- *                           description: Provider's full name
- *                         phone:
- *                           type: string
- *                           description: Provider's phone number
- *                         photo:
- *                           type: string
- *                           format: uri
- *                           description: URL to provider's photo
- *                         serviceCategories:
- *                           type: array
- *                           items:
- *                             type: string
- *                             enum: [TOWING, FLAT_TIRE, FUEL_DELIVERY, LOCKOUT, EMERGENCY, OTHER]
- *                           description: Categories of services the provider offers
- *                         averageRating:
- *                           type: number
- *                           minimum: 0
- *                           maximum: 5
- *                           description: Provider's average rating (0-5)
- *                         isApproved:
- *                           type: boolean
- *                           description: Whether the provider's account is approved
- *                         deleted:
- *                           type: boolean
- *                           description: Whether the provider's account is deleted
+ *                       $ref: '#/components/schemas/Provider'
  *       401:
- *         description: Invalid email or password
+ *         description: Authentication failed due to invalid credentials.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 status:
- *                   type: string
- *                   example: error
  *                 message:
  *                   type: string
  *                   example: Invalid email or password
@@ -100,28 +60,19 @@
  *             schema:
  *               type: object
  *               properties:
- *                 status:
- *                   type: string
- *                   example: error
  *                 message:
  *                   type: string
  *                   example: Account has been deleted and cannot be accessed
  *       500:
- *         description: Internal server error
+ *         description: Internal server error occurred during authentication.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 status:
- *                   type: string
- *                   example: error
  *                 message:
  *                   type: string
- *                   example: An unexpected error occurred
- *                 details:
- *                   type: string
- *                   example: Database connection failed
+ *                   example: Internal server error
  */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
@@ -148,9 +99,10 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
         logger.warn('Failed login attempt:', { email: req.body.email, info });
         return reject(new AppError('Invalid email or password', 401));
       }
+
       // Block login for deleted providers
       if ((provider as any).deleted) {
-        logger.warn('Login attempt for deleted provider account:', { email: req.body.email });
+        logger.warn('Login attempt for deleted account:', { email: req.body.email });
         return reject(new AppError('Account has been deleted and cannot be accessed', 403));
       }
 
@@ -160,7 +112,7 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
           return reject(new AppError('Error logging in', 500));
         }
 
-        logger.info('Successful login:', { email: provider.email });
+        logger.info('Successful provider login:', { email: provider.email });
         resolve(res.status(200).json({
           status: 'success',
           message: 'Login successful',
@@ -172,9 +124,8 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
               phone: provider.phone,
               photo: provider.photo,
               serviceCategories: provider.serviceCategories,
-              averageRating: provider.averageRating ?? null,
               isApproved: provider.isApproved,
-              deleted: provider.deleted
+              averageRating: provider.averageRating
             }
           }
         }));
