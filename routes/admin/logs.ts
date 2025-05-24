@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-import { requireAdmin } from "../../utils/requireAdmin";
 
 const router = express.Router();
 
@@ -36,8 +35,8 @@ const LOG_FILE_PATH = path.join(__dirname, "../../logs/combined.log");
  *       500:
  *         description: Server error while reading logs
  */
-// GET /admin/logs - Return recent log entries
-router.get("/", requireAdmin, async (req: Request, res: Response): Promise<void> => {
+// GET /admin/logs - Return recent log entries (public)
+router.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     if (!fs.existsSync(LOG_FILE_PATH)) {
       res.json([]);
