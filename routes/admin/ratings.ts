@@ -39,8 +39,27 @@ router.get(
   "/",
   catchAsync(async (req: Request, res: Response) => {
     const ratings = await prisma.service.findMany({
-      include: {
-        client: true,
+      select: {
+        id: true,
+        clientId: true,
+        providerId: true,
+        description: true,
+        price: true,
+        rating: true,
+        serviceLocation: true,
+        distance: true,
+        done: true,
+        createdAt: true,
+        updatedAt: true,
+        client: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            photo: true,
+          },
+        },
         provider: {
           select: {
             id: true,
@@ -59,7 +78,7 @@ router.get(
 
 // DELETE /admin/ratings/:id - Remove a rating/review (public)
 router.delete(
-  "/ratings/:id",
+  "/:id",
   catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const rating = await prisma.service.findUnique({ where: { id } });
