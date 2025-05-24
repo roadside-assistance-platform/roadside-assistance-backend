@@ -36,7 +36,7 @@ const prisma = new PrismaClient();
 
 // GET /admin/ratings - List all ratings/reviews (public)
 router.get(
-  "/ratings",
+  "/",
   catchAsync(async (req: Request, res: Response) => {
     const ratings = await prisma.service.findMany({
       include: {
