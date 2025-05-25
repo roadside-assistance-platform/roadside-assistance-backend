@@ -139,41 +139,97 @@ const providerUpdateRules = {
 
 import { catchAsync } from '../../utilities/catchAsync';
 
-router.put("/:id", validateRequest(providerUpdateRules), catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+router.put("/:id", catchAsync(async (req: any, res: any) => {
   const { id } = req.params;
   const updateData = req.body;
 
   if (!id) {
     logger.error("Provider ID is required");
-    return res.status(400).send("Provider ID is required");
+    return res.status(400).json({
+      status: 'error',
+      message: 'Provider ID is required'
+    });
   }
 
   try {
-    const existingUser = await prisma.provider.findUnique({ where: { id } });
+    const existingUser = await prisma.provider.findUnique({ 
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        deleted: true
+      }
+    });
+    
     if (!existingUser) {
       logger.error("Provider not found");
-      return res.status(404).send("Provider not found");
+      return res.status(404).json({
+        status: 'error',
+        message: 'Provider not found'
+      });
     }
 
     if (Object.keys(updateData).length === 0) {
       logger.error("No fields provided for update");
-      return res.status(400).send("No fields provided for update");
+      return res.status(400).json({
+        status: 'error',
+        message: 'No fields provided for update'
+      });
     }
 
+    // Validate serviceCategories if provided
+    if (updateData.serviceCategories) {
+      const allowedCategories = ["TOWING", "FLAT_TIRE", "FUEL_DELIVERY", "LOCKOUT", "EMERGENCY", "OTHER"];
+      if (!Array.isArray(updateData.serviceCategories) || 
+          !updateData.serviceCategories.every((cat: string) => allowedCategories.includes(cat))) {
+        return res.status(400).json({
+          status: 'error',
+          message: `Invalid serviceCategories. Allowed values: ${allowedCategories.join(", ")}`
+        });
+      }
+    }
+
+    // Hash password if provided
     if (updateData.password) {
       updateData.password = await hashPassword(updateData.password);
     }
 
+    // Prepare update data
+    const dataToUpdate = { ...updateData };
+    
     const updatedUser = await prisma.provider.update({
       where: { id },
-      data: updateData
+      data: dataToUpdate,
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        phone: true,
+        photo: true,
+        serviceCategories: true,
+        averageRating: true,
+        isApproved: true,
+        deleted: true,
+        createdAt: true,
+        updatedAt: true
+      }
     });
 
-    logger.info(`Provider updated successfully`);
-    res.status(200).json(updatedUser);
+    logger.info(`Provider updated successfully: ${id}`);
+    
+    return res.status(200).json({
+      status: 'success',
+      message: 'Provider updated successfully',
+      data: {
+        provider: updatedUser
+      }
+    });
   } catch (error) {
     logger.error(`Error updating provider:`, error);
-    res.status(500).send("An error occurred while updating the provider");
+    return res.status(500).json({
+      status: 'error',
+      message: 'An error occurred while updating the provider'
+    });
   }
 }));
 
