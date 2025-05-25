@@ -221,7 +221,7 @@ router.put("/:id", catchAsync(async (req: any, res: any) => {
       status: 'success',
       message: 'Provider updated successfully',
       data: {
-        provider: updatedUser
+        user: updatedUser
       }
     });
   } catch (error) {
