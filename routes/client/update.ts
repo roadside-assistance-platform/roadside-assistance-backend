@@ -194,7 +194,7 @@ router.put("/:id", catchAsync(async (req: any, res: any) => {
       status: 'success',
       message: 'Client updated successfully',
       data: {
-        client: updatedUser
+        user: updatedUser
       }
     });
   } catch (error) {
