@@ -349,7 +349,7 @@ app.use("/google/verify", verifygoogleToken);
 //client
 app.use("/client/login", loginClient);
 app.use("/client/signup", createClient);
-app.use("/client/update",isAuthenticated,updateClient)
+app.use("/client/update",updateClient)
 app.use("/client/clients", clients);
 app.use("/client/delete", require("./routes/client/delete").default);
 app.use("/client/info",isAuthenticated,clientInfo)

@@ -45,34 +45,10 @@
  *                       $ref: '#/components/schemas/Provider'
  *       401:
  *         description: Authentication failed due to invalid credentials.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid email or password
  *       403:
  *         description: Account has been deleted and cannot be accessed.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Account has been deleted and cannot be accessed
  *       500:
  *         description: Internal server error occurred during authentication.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Internal server error
  */
 import { Router, Request, Response, NextFunction } from "express";
 import passport from "../../utilities/passport";
@@ -112,7 +88,7 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
           return reject(new AppError('Error logging in', 500));
         }
 
-        logger.info('Successful provider login:', { email: provider.email });
+        logger.info('Successful login:', { email: provider.email });
         resolve(res.status(200).json({
           status: 'success',
           message: 'Login successful',
@@ -124,8 +100,8 @@ router.post("/", catchAsync(async (req: Request, res: Response, next: NextFuncti
               phone: provider.phone,
               photo: provider.photo,
               serviceCategories: provider.serviceCategories,
-              isApproved: provider.isApproved,
-              averageRating: provider.averageRating
+              averageRating: provider.averageRating,
+              isApproved: provider.isApproved
             }
           }
         }));
